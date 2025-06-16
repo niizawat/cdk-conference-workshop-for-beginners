@@ -93,7 +93,7 @@ graph LR
 - コードでAWSリソースを管理
 - 再利用・自動化が簡単
 - AWS公式サポート
-- TypeScript/JavaScript/Pythonなどに対応
+- TypeScript / JavaScript / Python / Java / C# / Golangに対応
 
 ---
 
@@ -106,18 +106,98 @@ graph LR
 3. AWS上にリソースが作られる様子を確認
 4. 実際にWebアプリを動かしてみる
 
+---
+
+# まずは認証情報を確認しよう
+
+CDKを実行する前に、AWS CLIの認証情報が正しく設定されているか確認しましょう。
+
+```bash
+# 現在の認証情報でAWSアカウント情報を確認
+aws sts get-caller-identity
+```
+
+- アカウント情報（Account/Arn）が表示されればOKです。
+- エラーが出る場合は、`aws configure` で設定を見直してください。
+
 💡ヒント  
-うまくいかない場合は講師やサポーターに声をかけてください
+MFAやプロファイルを使っている場合は、案内に従って設定してください。
 
 ---
 
-# サンプルアプリのアーキテクチャ
+# Node.jsがインストールされているか確認しよう
+
+CDKやフロントエンドの開発にはNode.jsが必要です。
+
+```bash
+# Node.jsのバージョンを確認
+node -v
+```
+
+- バージョン番号（最小:v18.0以降、推奨:v22.0以降）が表示されればOKです。
+- 表示されない場合は、[Node.js公式サイト](https://nodejs.org/)からインストールしてください。
+
+💡ヒント  
+推奨バージョンはLTS（長期サポート版）です。
+
+---
+
+# 実行手順（コマンド例）
+
+```bash
+# サンプルリポジトリをクローン
+# ※リポジトリURLは当日案内
+
+git clone <リポジトリURL>
+cd <リポジトリディレクトリ>
+
+# 依存パッケージをインストール
+npm install
+
+# CDKの動作確認（CloudFormationテンプレート生成）
+npx cdk synth
+
+# AWSへデプロイ
+npx cdk deploy
+```
+
+💡ヒント  
+デプロイ時にMFAや権限エラーが出た場合は、講師やサポーターにご相談ください。
+
+---
+layout: two-cols
+image: ./images/demo.png
+---
+
+# デプロイ後の動作確認
+
+1. **API GatewayのエンドポイントURLを確認**
+   - デプロイ完了時の出力、またはAWSコンソールのAPI Gateway画面でURLを確認
+
+2. **Webアプリにアクセス**
+   - ブラウザで `https://<API GatewayのURL>/` にアクセス
+   - Reactアプリの画面が表示されることを確認
+
+3. **翻訳APIのテスト**
+   - ブラウザ上で翻訳機能を試す
+
+::right::
+
+![デモ画面](./images/demo.png)
+
+---
+
+# サンプルコードのアーキテクチャ
+
+<br/>
+<br/>
 
 ```mermaid
-graph TD
+%%{init: {'theme':'default', 'look': 'handDrawn'}}%%
+graph LR
   subgraph "フロントエンド"
-    A["ユーザーのWebブラウザ"]
-    B["S3バケット<br/>(Reactアプリ静的ホスティング)"]
+    A["Webブラウザ"]
+    B[("S3バケット<br/>(Reactアプリ静的ホスティング)")]
   end
 
   subgraph "バックエンド"
@@ -193,7 +273,7 @@ mkdir my-translate-app
 cd my-translate-app
 
 # CDKプロジェクトを初期化
-cdk init app --language typescript
+npx cdk init app --language typescript
 
 # 必要なパッケージをインストール
 npm install
@@ -281,10 +361,6 @@ cdk deploy
 
 💡ヒント  
 デプロイには数分かかります。焦らず待ちましょう！
-
-<!--
-デプロイ中に、参加者同士で進捗を確認し合ったり、質問タイムにするのも良いでしょう。
--->
 
 ---
 

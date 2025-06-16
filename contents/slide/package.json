@@ -15,5 +15,8 @@
     "aws-cdk-lib": "^2.201.0",
     "constructs": "^10.4.2",
     "vue": "^3.5.16"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.53.0"
   }
 }
