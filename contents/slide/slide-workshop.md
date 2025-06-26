@@ -34,22 +34,18 @@ TypeScriptで学ぶIaC
 # 事前準備の確認
 
 - ✅ AWSアカウント（Admin権限）
-- ✅ AWS CLIがインストール・設定済み
-- ✅ TypeScript開発環境
 - ✅ ノートPC持参
-
-💡ヒント  
-準備に不安がある方は、講師やサポーターにお声がけください
 
 ---
 
 # 本日の流れ
 
-1. CDKの概要と体験
-2. サンプルコードでCDKを動かす
-3. コードの中身を理解
-4. 自分でWebアプリのインフラを構築
-5. まとめ・質疑応答
+1. CDKの概要
+2. ワークショップ環境の構築
+3. サンプルコードでCDKを動かす
+4. コードの中身を理解
+5. 自分でWebアプリのインフラを構築
+6. まとめ・質疑応答
 
 ---
 
@@ -97,93 +93,97 @@ graph LR
 
 ---
 
+# Visual Studio Code Serverを構築しよう
+
+**構築手順：**
+
+1. 「TypeScript の基礎から始める AWS CDK 開発入門」にアクセス
+    - https://catalog.workshops.aws/typescript-and-cdk-for-beginner/ja-JP
+
+2. 左メニューから「開発環境のセットアップ」→「ご自身で実施するワークショップ」→「Visual Studio Code Server のセットアップ」にアクセス
+
+2. ”Asia Pacific (Tokyo) ap-northeast-1"の「Launch Stack」ボタンをクリック
+
+3. 以降、ページに記載された手順に従って、Visual Studio Code IDEを表示するところまで進めてください。
+
+※ デプロイには約8分程度かかります。
+
+---
+
 # 体験：サンプルコードでCDKを動かしてみよう
 
 事前に用意した翻訳Webアプリのサンプルコードを使って、CDKの威力を体験しましょう！
 
+**手順：**
 1. リポジトリをクローン
-2. CDKコマンドでデプロイ
-3. AWS上にリソースが作られる様子を確認
-4. 実際にWebアプリを動かしてみる
+2. 依存関係をインストール
+3. CDKコマンドでデプロイ
+4. AWS上にリソースが作られる様子を確認
+5. 実際にWebアプリを動かしてみる
+
+**所要時間：** 約10-15分
 
 ---
 
-# まずは認証情報を確認しよう
-
-CDKを実行する前に、AWS CLIの認証情報が正しく設定されているか確認しましょう。
+# 実行手順
 
 ```bash
-# 現在の認証情報でAWSアカウント情報を確認
-aws sts get-caller-identity
-```
+# 1. リポジトリクローン
+git clone https://github.com/your-org/cdk-hello-workshop.git
+cd cdk-hello-workshop
 
-- アカウント情報（Account/Arn）が表示されればOKです。
-- エラーが出る場合は、`aws configure` で設定を見直してください。
-
-💡ヒント  
-MFAやプロファイルを使っている場合は、案内に従って設定してください。
-
----
-
-# Node.jsがインストールされているか確認しよう
-
-CDKやフロントエンドの開発にはNode.jsが必要です。
-
-```bash
-# Node.jsのバージョンを確認
-node -v
-```
-
-- バージョン番号（最小:v18.0以降、推奨:v22.0以降）が表示されればOKです。
-- 表示されない場合は、[Node.js公式サイト](https://nodejs.org/)からインストールしてください。
-
-💡ヒント  
-推奨バージョンはLTS（長期サポート版）です。
-
----
-
-# 実行手順（コマンド例）
-
-```bash
-# サンプルリポジトリをクローン
-# ※リポジトリURLは当日案内
-
-git clone <リポジトリURL>
-cd <リポジトリディレクトリ>
-
-# 依存パッケージをインストール
+# 2. 依存関係インストール
 npm install
 
-# CDKの動作確認（CloudFormationテンプレート生成）
-npx cdk synth
+# 3. CDK動作確認
+cdk synth
+# 生成されたCloudFormationテンプレートが表示されればOK
 
-# AWSへデプロイ
-npx cdk deploy
+# 4. AWSへデプロイ
+cdk deploy
+........
+Do you wish to deploy these changes (y/n)?  <-- yを入力
 ```
 
-💡ヒント  
-デプロイ時にMFAや権限エラーが出た場合は、講師やサポーターにご相談ください。
-
 ---
-layout: two-cols
-image: ./images/demo.png
+
+# デプロイ後 の出力例
+
+```bash
+HelloApiStack: deploying... [1/1]
+HelloApiStack: creating CloudFormation changeset...
+
+ ✅  HelloApiStack
+
+✨  Deployment time: 45.2s
+
+Outputs:
+HelloApiStack.ApiUrl = https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/
+Stack ARN:
+arn:aws:cloudformation:ap-northeast-1:xxxxxxxxxxxx:stack/HelloApiStack/744321e0-4f50-11f0-8f6c-0685b8690b3b
+
+✨  Total time: 52.8s
+```
+
 ---
 
 # デプロイ後の動作確認
 
-1. **API GatewayのエンドポイントURLを確認**
-   - デプロイ完了時の出力、またはAWSコンソールのAPI Gateway画面でURLを確認
+1. **API URLを確認**
+   - デプロイ完了時に出力されるURL: HelloApiStack.ApiUrl
 
-2. **Webアプリにアクセス**
-   - ブラウザで `https://<API GatewayのURL>/` にアクセス
-   - Reactアプリの画面が表示されることを確認
+2. **Hello APIにアクセス**
+   ```bash
+   curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
+   ```
 
-3. **翻訳APIのテスト**
-   - ブラウザ上で翻訳機能を試す
-
-::right::
-
-![デモ画面](./images/demo.png)
+3. **レスポンス確認**
+   ```json
+   {
+     "message": "Hello, World!",
+     "timestamp": "2024-01-15T10:30:00.000Z"
+   }
+   ```
 
 ---
 
@@ -197,7 +197,7 @@ image: ./images/demo.png
 graph LR
   subgraph "フロントエンド"
     A["Webブラウザ"]
-    B[("S3バケット<br/>(Reactアプリ静的ホスティング)")]
+    B[("S3バケット<br/>(HTMLアプリ静的ホスティング)")]
   end
 
   subgraph "バックエンド"
@@ -224,25 +224,47 @@ graph LR
 
 # サンプルコードの中身を見てみよう
 
-CDKでこれだけのインフラが簡単に作れます！
-
 ```ts {monaco}
-export class TranslateAppStack extends cdk.Stack {
+export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // S3バケット
-    const bucket = new s3.Bucket(this, 'WebsiteBucket');
+    // S3バケット（静的ファイル保存用）
+    const websiteBucket = new s3.Bucket(this, 'TranslateWebsiteBucket', {
+      bucketName: `translate-website-${this.account}-${this.region}`,
+      publicReadAccess: false, // API Gateway経由でアクセスするためpublicアクセスは無効
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
     
-    // Lambda関数
+    // Lambda関数（翻訳処理用）
     const translateFunction = new lambda.Function(this, 'TranslateFunction', {
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/translate'),
+      timeout: cdk.Duration.seconds(30),
     });
 
-    // API Gateway
-    const api = new apigateway.RestApi(this, 'TranslateApi');
+    // Lambda関数にTranslateとComprehendの権限を付与
+    translateFunction.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'translate:TranslateText',
+        'comprehend:DetectDominantLanguage'
+      ],
+      resources: ['*']
+    }));
+
+    // API Gateway（REST API）
+    const api = new apigateway.RestApi(this, 'TranslateApi', {
+      restApiName: 'Translate Service',
+      description: 'AWS Translateを使用した翻訳API',
+      binaryMediaTypes: [
+        'image/*', 'text/css', 'application/javascript',
+        'application/json', 'text/html', 'text/plain', 'font/*'
+      ]
+    });
   }
 }
 ```
@@ -253,15 +275,17 @@ export class TranslateAppStack extends cdk.Stack {
 
 ---
 
-# ハンズオン：自分でWebアプリを作ってみよう
+# ハンズオン：シンプルなAPIを作ってみよう
 
-これから皆さんに作っていただくのは、シンプルな翻訳Webアプリです
+まずは基本から！Hello WorldのAPIを作成しましょう
 
 **使用するAWSサービス：**
-- S3（静的ファイル保存）
-- Lambda（翻訳処理）
+
+- Lambda（Hello World処理）
 - API Gateway（APIエンドポイント）
-- Amazon Translate（翻訳サービス）
+
+**作成するAPI：**
+- `GET /hello` → `Hello, World!`を返す
 
 ---
 
@@ -269,39 +293,14 @@ export class TranslateAppStack extends cdk.Stack {
 
 ```bash
 # 新しいディレクトリを作成
-mkdir my-translate-app
-cd my-translate-app
+mkdir my-hello-api
+cd my-hello-api
 
 # CDKプロジェクトを初期化
-npx cdk init app --language typescript
+cdk init app --language typescript
 
 # 必要なパッケージをインストール
 npm install
-```
-
-💡ヒント  
-エラーが出た場合は、Node.jsのバージョンを確認してください
-
----
-
-# S3バケットを作成しよう
-
-S3 = ファイルを保存する「倉庫」
-
-```ts {monaco}
-import * as s3 from 'aws-cdk-lib/aws-s3';
-
-export class MyTranslateStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
-
-    // S3バケットを作成
-    const websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
-      bucketName: `translate-app-${this.account}-${this.region}`,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
-  }
-}
 ```
 
 ---
@@ -310,77 +309,167 @@ export class MyTranslateStack extends cdk.Stack {
 
 Lambda = サーバーレスでコードを実行
 
+まず、Lambda関数のコードファイルを作成します：
+
+```bash
+# Lambdaコード用のディレクトリを作成
+mkdir -p lambda/hello
+
+# Lambda関数のファイルを作成
+touch lambda/hello/index.js
+```
+
+`lambda/hello/index.js` をエディタで開き、以下のコードを入力してください：
+
+```js
+exports.handler = async (event) => {
+  return {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: 'Hello, World!',
+      timestamp: new Date().toISOString()
+    })
+  };
+};
+```
+
+次に、`lib/my-hello-api-stack.ts`を以下のように変更してLambda関数を定義します：
+
 ```ts {monaco}
+import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { Construct } from 'constructs';
 
-// Lambda関数を作成
-const translateFunction = new lambda.Function(this, 'TranslateFunction', {
-  runtime: lambda.Runtime.NODEJS_18_X,
-  handler: 'index.handler',
-  code: lambda.Code.fromAsset('lambda/translate'),
-  environment: {
-    BUCKET_NAME: websiteBucket.bucketName,
-  },
-});
+export class HelloApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
 
-// S3への読み書き権限を付与
-websiteBucket.grantReadWrite(translateFunction);
+    // Lambda関数（Hello World処理用）
+    const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/hello'),
+    });
+  }
+}
 ```
 
 ---
 
 # API Gatewayを作成しよう
 
-API Gateway = Web APIの入り口
-
 ```ts {monaco}
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 
-// API Gatewayを作成
-const api = new apigateway.RestApi(this, 'TranslateApi', {
-  restApiName: 'Translate Service',
-  description: 'This service translates text.',
+// API Gateway（REST API）
+const api = new apigateway.RestApi(this, 'HelloApi', {
+  restApiName: 'Hello World API',
+  description: 'シンプルなHello World API',
 });
 
-// /translate エンドポイントを追加
-const translateIntegration = new apigateway.LambdaIntegration(translateFunction);
-api.root.addResource('translate').addMethod('POST', translateIntegration);
+// Lambda統合
+const helloIntegration = new apigateway.LambdaIntegration(helloFunction);
+
+// /helloエンドポイントの作成
+const helloResource = api.root.addResource('hello');
+helloResource.addMethod('GET', helloIntegration);
+
+// 出力値の設定
+new cdk.CfnOutput(this, 'ApiUrl', {
+  value: api.url,
+  description: 'API Gateway URL'
+});
 ```
 
 ---
 
-# デプロイしてみよう
+# 動作確認してみよう
 
 ```bash
-# CloudFormationテンプレートを生成
-cdk synth
-
-# AWSにデプロイ
+# デプロイ
 cdk deploy
+
+# 出力されるAPI URLにアクセス
+curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
+
+# レスポンス例
+{
+  "message": "Hello, World!",
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
 ```
 
-💡ヒント  
-デプロイには数分かかります。焦らず待ちましょう！
+---
+
+# 🎉 おめでとうございます！
+
+基本のAPIができました！
+
+**できたこと：**
+- Lambda関数の作成
+- API Gatewayの設定
+- CDKでのデプロイ
 
 ---
 
-# 動作確認
+# 🚀 発展課題にチャレンジ！
 
-1. AWSコンソールでリソースを確認
-2. API GatewayのエンドポイントURLを取得
-3. 翻訳APIをテスト
-4. Webアプリにアクセスして動作確認
+基本ができた方は、以下の課題にチャレンジしてみましょう：
+
+**レベル1：パラメータを受け取る**
+- `/hello/{name}` で名前を受け取り、`Hello, {name}!`を返す
+
+**レベル2：POST APIを作る**
+- `POST /echo` でリクエストボディをそのまま返す
+
+**レベル3：外部サービス連携**
+- Amazon Translateを使った翻訳API
+- DynamoDBを使ったデータ保存API
+- S3を使ったファイルアップロードAPI
 
 ---
 
-# よくあるエラーと対処法
+# 発展課題：Amazon Translate API
 
-- **権限エラー**: IAMロールやポリシーを確認
-- **デプロイ失敗**: AWS CLIの設定やリージョンを確認
-- **タイプエラー**: コードのスペルミスを確認
+```ts {monaco}
+// Lambda関数にTranslateとComprehendの権限を付与
+translateFunction.addToRolePolicy(new iam.PolicyStatement({
+  effect: iam.Effect.ALLOW,
+  actions: [
+    'translate:TranslateText',
+    'comprehend:DetectDominantLanguage'
+  ],
+  resources: ['*']
+}));
 
-💡ヒント  
-エラーメッセージをよく読んで、落ち着いて対処しましょう
+// /translateエンドポイントの作成
+const translateResource = api.root.addResource('translate');
+translateResource.addMethod('POST', new apigateway.LambdaIntegration(translateFunction));
+```
+
+**Lambda関数の例：**
+```js
+const { TranslateClient, TranslateTextCommand } = require('@aws-sdk/client-translate');
+
+exports.handler = async (event) => {
+  const { text, targetLang = 'ja' } = JSON.parse(event.body);
+  
+  const translateClient = new TranslateClient({ region: process.env.AWS_REGION });
+  const result = await translateClient.send(new TranslateTextCommand({
+    Text: text,
+    SourceLanguageCode: 'auto',
+    TargetLanguageCode: targetLang
+  }));
+  
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ translatedText: result.TranslatedText })
+  };
+};
+```
 
 ---
 
@@ -393,19 +482,18 @@ cdk deploy
 cdk destroy
 ```
 
-💡ヒント  
-本番環境では絶対に間違えて削除しないよう注意！
-
 ---
 
 # まとめ
 
 **今日学んだこと：**
+
 - CDKでインフラをコードで管理する方法
 - TypeScriptでAWSリソースを定義する書き方
 - デプロイから削除までの一連の流れ
 
 **CDKの魅力：**
+
 - 再利用可能
 - バージョン管理できる
 - チームで共有しやすい
@@ -414,9 +502,9 @@ cdk destroy
 
 # さらに学ぶために
 
-- **AWS CDK公式ドキュメント**: https://docs.aws.amazon.com/cdk/
-- **CDK Examples**: https://github.com/aws-samples/aws-cdk-examples
-- **AWS CDK Workshop**: https://cdkworkshop.com/
+- **AWS CDK公式ドキュメント**: <https://docs.aws.amazon.com/cdk/>
+- **CDK Examples**: <https://github.com/aws-samples/aws-cdk-examples>
+- **AWS CDK Workshop**: <https://cdkworkshop.com/>
 
 ---
 
@@ -435,9 +523,9 @@ cdk destroy
 
 ---
 
-# ありがとうございました！
+# ありがとうございました
 
 お疲れさまでした！
 皆さんの今後のAWS CDK活用を応援しています 🎉
 
-**アンケートのご協力をお願いします** 
+**アンケートのご協力をお願いします**
