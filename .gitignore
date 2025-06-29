@@ -2,3 +2,4 @@
 cdk/cdk.out
 **/.cursorindexingignore
 **/.DS_Store
+node_modules

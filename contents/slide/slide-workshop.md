@@ -3,10 +3,13 @@ fonts:
   sans: Noto Sans JP
   serif: Noto Serif JP
   mono: Fira Code
-theme: seriph
+theme: neversink
+layout: cover
 ---
 
 # AWS CDKワークショップ
+
+::note::
 
 AWS CDKでインフラ構築を体験しよう！
 90分で「できる！」を実感
@@ -17,8 +20,33 @@ TypeScriptで学ぶIaC
 -->
 
 ---
+layout: top-title-two-cols
+color: amber
+align: l-lt-lt
+---
+
+::title::
+
+# 自己紹介
+
+::left::
+
+自己紹介
+
+::right::
+
+画像
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 本日のゴール
+
+::content::
 
 - CDKの基本を理解する
 - サンプルコードでCDKの威力を体験
@@ -30,15 +58,29 @@ TypeScriptで学ぶIaC
 -->
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 事前準備の確認
+
+::content::
 
 - ✅ AWSアカウント（Admin権限）
 - ✅ ノートPC持参
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 本日の流れ
+
+::content::
 
 1. CDKの概要
 2. ワークショップ環境の構築
@@ -48,8 +90,15 @@ TypeScriptで学ぶIaC
 6. まとめ・質疑応答
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # AWS CDKとは？
+
+::content::
 
 - AWSのインフラをTypeScriptなどで記述できるツール
 - 「レゴブロック」のように部品を組み合わせて作る感覚
@@ -63,8 +112,15 @@ graph LR
 ```
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # CDKの特徴・メリット
+
+::content::
 
 - コードでAWSリソースを管理
 - 再利用・自動化が簡単
@@ -72,8 +128,73 @@ graph LR
 - TypeScript / JavaScript / Python / Java / C# / Golangに対応
 
 ---
+layout: top-title-two-cols
+color: amber
+align: l-lt-lt
+---
+
+::title::
+
+# CDKの多言語対応例
+
+::left::
+
+## TypeScript
+
+```ts
+export class S3Stack extends cdk.Stack {
+  constructor(scope: Construct, id: string,
+   props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    const bucket = new s3.Bucket(this, 'MyBucket', {
+      bucketName: 'my-example-bucket-12345',
+      versioned: true,
+      publicReadAccess: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    new cdk.CfnOutput(this, 'BucketName', {
+      value: bucket.bucketName
+    });
+  }
+}
+```
+
+::right::
+
+## Python
+
+```python
+class S3Stack(Stack):
+    def __init__(self, scope: Construct, 
+      construct_id: str, **kwargs) -> None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        bucket = s3.Bucket(self, "MyBucket",
+            bucket_name="my-example-bucket-12345",
+            versioned=True,
+            public_read_access=False,
+            removal_policy=RemovalPolicy.DESTROY,
+            auto_delete_objects=True
+        )
+
+        CfnOutput(self, "BucketName",
+            value=bucket.bucket_name
+        )
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # Visual Studio Code Serverを構築しよう
+
+::content::
 
 **構築手順：**
 
@@ -89,8 +210,15 @@ graph LR
 ※ デプロイには約8分程度かかります。
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 体験：サンプルコードでCDKを動かしてみよう
+
+::content::
 
 事前に用意した翻訳Webアプリのサンプルコードを使って、CDKの威力を体験しましょう！
 
@@ -104,13 +232,22 @@ graph LR
 **所要時間：** 約10-15分
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 実行手順
 
+::content::
+
+<!-- 実際にVSCodeの画面で見せる -->
+
 ```bash
 # 1. リポジトリクローン
-git clone https://github.com/your-org/cdk-hello-workshop.git
-cd cdk-hello-workshop
+git clone https://github.com/niizawat/cdk-workshop-example.git
+cd cdk-workshop-example
 
 # 2. 依存関係インストール
 npm install
@@ -126,48 +263,67 @@ Do you wish to deploy these changes (y/n)?  <-- yを入力
 ```
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # デプロイ後 の出力例
 
+::content::
+
 ```bash
-HelloApiStack: deploying... [1/1]
-HelloApiStack: creating CloudFormation changeset...
+AppStack: deploying... [1/1]
+AppStack: creating CloudFormation changeset...
 
- ✅  HelloApiStack
+ ✅  AppStack
 
-✨  Deployment time: 45.2s
+✨  Deployment time: 94.21s
 
 Outputs:
-HelloApiStack.ApiUrl = https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/
+AppStack.ApiGatewayURL = https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/
+AppStack.BucketName = translate-website-123456789012-ap-northeast-1
+AppStack.TranslateApiEndpointBF4D5864 = https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/
+AppStack.WebsiteURL = https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/
 Stack ARN:
-arn:aws:cloudformation:ap-northeast-1:xxxxxxxxxxxx:stack/HelloApiStack/744321e0-4f50-11f0-8f6c-0685b8690b3b
+arn:aws:cloudformation:ap-northeast-1:123456789012:stack/AppStack/d9b61de0-5485-11f0-a14f-06c66a81218f
 
-✨  Total time: 52.8s
+✨  Total time: 97.31s
 ```
 
 ---
-
-# デプロイ後の動作確認
-
-1. **API URLを確認**
-   - デプロイ完了時に出力されるURL: HelloApiStack.ApiUrl
-
-2. **Hello APIにアクセス**
-   ```bash
-   curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
-   ```
-
-3. **レスポンス確認**
-   ```json
-   {
-     "message": "Hello, World!",
-     "timestamp": "2024-01-15T10:30:00.000Z"
-   }
-   ```
-
+layout: top-title-two-cols
+color: amber
+align: l-lt-lt
 ---
 
+::title::
+# デプロイ後の動作確認
+
+::left::
+
+1. **Webアプリにアクセス**
+   - ブラウザで `Website URL`にアクセス
+   - アプリの画面が表示されることを確認
+
+2. **翻訳APIのテスト**
+   - ブラウザ上で翻訳機能を試す
+
+::right::
+
+![画像](./images/demo.png)
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
 # サンプルコードのアーキテクチャ
+
+::content::
 
 <br/>
 <br/>
@@ -177,10 +333,10 @@ arn:aws:cloudformation:ap-northeast-1:xxxxxxxxxxxx:stack/HelloApiStack/744321e0-
 graph LR
   subgraph "フロントエンド"
     A["Webブラウザ"]
-    B[("S3バケット<br/>(HTMLアプリ静的ホスティング)")]
   end
 
   subgraph "バックエンド"
+    B[("S3バケット<br/>(HTMLアプリ静的ホスティング)")]
     C["API Gateway"]
     D["Lambda関数<br/>(翻訳処理)"]
     E["Amazon Translate"]
@@ -201,8 +357,69 @@ graph LR
 ```
 
 ---
+layout: top-title
+color: amber
+---
 
-# サンプルコードの中身を見てみよう
+::title::
+
+# CDKアプリケーションの基本的なディレクトリ構造
+
+::content::
+
+```sh
+├── bin/
+│   └── cdk.ts          # CDKアプリのエントリーポイント
+├── lib/
+│   └── app-stack.ts    # スタック定義（メインのインフラコード）
+├── test/               # テストファイル格納ディレクトリ
+├── cdk.json           # CDKプロジェクトの設定ファイル
+├── jest.config.js      # テスト設定ファイル
+└── tsconfig.json      # TypeScript設定ファイル
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# CDKアプリのエントリーポイント
+
+::content::
+
+`bin/cdk.ts` はCDKアプリケーションのメインエントリーポイントです
+
+```ts {monaco}
+#!/usr/bin/env node
+import * as cdk from 'aws-cdk-lib';
+import { AppStack } from '../lib/app-stack';
+
+const app = new cdk.App();
+new AppStack(app, 'AppStack', {
+  /* 環境設定のオプション */
+  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+  // env: { account: '123456789012', region: 'us-east-1' },
+});
+```
+
+**各行の解説：**
+- `import * as cdk` - AWS CDKのコアライブラリを読み込み
+- `import { AppStack }` - 自作のスタック定義を読み込み
+- `new cdk.App()` - CDKアプリケーションのインスタンスを作成
+- `new AppStack()` - スタックをアプリに追加
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# CDKスタックの定義
+
+::content::
 
 ```ts {monaco}
 export class AppStack extends cdk.Stack {
@@ -254,8 +471,15 @@ export class AppStack extends cdk.Stack {
 -->
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # ハンズオン：シンプルなAPIを作ってみよう
+
+::content::
 
 まずは基本から！Hello WorldのAPIを作成しましょう
 
@@ -268,8 +492,15 @@ export class AppStack extends cdk.Stack {
 - `GET /hello` → `Hello, World!`を返す
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # CDKプロジェクトの作成
+
+::content::
 
 ```bash
 # 新しいディレクトリを作成
@@ -284,8 +515,15 @@ npm install
 ```
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # Lambda関数を作成しよう
+
+::content::
 
 Lambda = サーバーレスでコードを実行
 
@@ -338,8 +576,19 @@ export class HelloApiStack extends cdk.Stack {
 ```
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # API Gatewayを作成しよう
+
+::content::
+
+コードをどこに追加するのか説明を加える
+
+diffをみる
 
 ```ts {monaco}
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
@@ -364,9 +613,19 @@ new cdk.CfnOutput(this, 'ApiUrl', {
 });
 ```
 
+最終的なコードを確認してもらう
+ライブコーディングでもよさそう
+
+---
+layout: top-title
+color: amber
 ---
 
+::title::
+
 # 動作確認してみよう
+
+::content::
 
 ```bash
 # デプロイ
@@ -383,8 +642,15 @@ curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
 ```
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 🎉 おめでとうございます！
+
+::content::
 
 基本のAPIができました！
 
@@ -394,8 +660,15 @@ curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
 - CDKでのデプロイ
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 🚀 発展課題にチャレンジ！
+
+::content::
 
 基本ができた方は、以下の課題にチャレンジしてみましょう：
 
@@ -410,9 +683,18 @@ curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
 - DynamoDBを使ったデータ保存API
 - S3を使ったファイルアップロードAPI
 
+API Documentのリンク
+
+---
+layout: top-title
+color: amber
 ---
 
+::title::
+
 # 発展課題：Amazon Translate API
+
+::content::
 
 ```ts {monaco}
 // Lambda関数にTranslateとComprehendの権限を付与
@@ -452,8 +734,15 @@ exports.handler = async (event) => {
 ```
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 片付け（重要！）
+
+::content::
 
 作成したリソースを削除して、課金を防ぎましょう
 
@@ -462,9 +751,18 @@ exports.handler = async (event) => {
 cdk destroy
 ```
 
+VSCode Serverを削除
+
+---
+layout: top-title
+color: amber
 ---
 
+::title::
+
 # まとめ
+
+::content::
 
 **今日学んだこと：**
 
@@ -479,16 +777,30 @@ cdk destroy
 - チームで共有しやすい
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # さらに学ぶために
+
+::content::
 
 - **AWS CDK公式ドキュメント**: <https://docs.aws.amazon.com/cdk/>
 - **CDK Examples**: <https://github.com/aws-samples/aws-cdk-examples>
 - **AWS CDK Workshop**: <https://cdkworkshop.com/>
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # 質疑応答
+
+::content::
 
 ご質問をお聞かせください！
 
@@ -502,8 +814,15 @@ cdk destroy
 -->
 
 ---
+layout: top-title
+color: amber
+---
+
+::title::
 
 # ありがとうございました
+
+::content::
 
 お疲れさまでした！
 皆さんの今後のAWS CDK活用を応援しています 🎉
