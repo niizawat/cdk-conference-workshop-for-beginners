@@ -790,6 +790,7 @@ color: amber
 - **AWS CDK公式ドキュメント**: <https://docs.aws.amazon.com/cdk/>
 - **CDK Examples**: <https://github.com/aws-samples/aws-cdk-examples>
 - **AWS CDK Workshop**: <https://cdkworkshop.com/>
+- **Amazon Q Developer CLI ではじめる、効率的なアプリケーション開発**: <https://aws.amazon.com/jp/builders-flash/202505/q-developer-cli-app-development/>
 
 ---
 layout: top-title
