@@ -1,638 +1,1032 @@
 ---
-# You can also start simply with 'default'
-theme: seriph
-# random image from a curated Unsplash collection by Anthony
-# like them? see https://unsplash.com/collections/94734566/slidev
-background: https://cover.sli.dev
-# some information about your slides (markdown enabled)
-title: Welcome to Slidev
-info: |
-  ## Slidev Starter Template
-  Presentation slides for developers.
-
-  Learn more at [Sli.dev](https://sli.dev)
-# apply unocss classes to the current slide
-class: text-center
-# https://sli.dev/features/drawing
-drawings:
-  persist: false
-# slide transition: https://sli.dev/guide/animations.html#slide-transitions
-transition: slide-left
-# enable MDC Syntax: https://sli.dev/features/mdc
-mdc: true
-# open graph
-# seoMeta:
-#  ogImage: https://cover.sli.dev
+fonts:
+  sans: Noto Sans JP
+  serif: Noto Serif JP
+  mono: Fira Code
+theme: neversink
+layout: cover
+lineNumbers: true
 ---
 
-# Welcome to Slidev
+# AWS CDKワークショップ
 
-Presentation slides for developers
+::note::
 
-<div @click="$slidev.nav.next" class="mt-12 py-1" hover:bg="white op-10">
-  Press Space for next page <carbon:arrow-right />
-</div>
-
-<div class="abs-br m-6 text-xl">
-  <button @click="$slidev.nav.openInEditor()" title="Open in Editor" class="slidev-icon-btn">
-    <carbon:edit />
-  </button>
-  <a href="https://github.com/slidevjs/slidev" target="_blank" class="slidev-icon-btn">
-    <carbon:logo-github />
-  </a>
-</div>
-
-<!--
-The last comment block of each slide will be treated as slide notes. It will be visible and editable in Presenter Mode along with the slide. [Read more in the docs](https://sli.dev/guide/syntax.html#notes)
--->
+AWS CDKでインフラ構築を体験しよう！
+90分で「できる！」を実感
+TypeScriptで学ぶIaC
 
 ---
-transition: fade-out
+layout: top-title-two-cols
+color: amber
+align: l-lt-lt
 ---
 
-# What is Slidev?
+::title::
 
-Slidev is a slides maker and presenter designed for developers, consist of the following features
+# 自己紹介
 
-- 📝 **Text-based** - focus on the content with Markdown, and then style them later
-- 🎨 **Themable** - themes can be shared and re-used as npm packages
-- 🧑‍💻 **Developer Friendly** - code highlighting, live coding with autocompletion
-- 🤹 **Interactive** - embed Vue components to enhance your expressions
-- 🎥 **Recording** - built-in recording and camera view
-- 📤 **Portable** - export to PDF, PPTX, PNGs, or even a hostable SPA
-- 🛠 **Hackable** - virtually anything that's possible on a webpage is possible in Slidev
-<br>
-<br>
+::left::
 
-Read more about [Why Slidev?](https://sli.dev/guide/why)
-
-<!--
-You can have `style` tag in markdown to override the style for the current page.
-Learn more: https://sli.dev/features/slide-scope-style
--->
-
-<style>
-h1 {
-  background-color: #2B90B6;
-  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
-  background-size: 100%;
-  -webkit-background-clip: text;
-  -moz-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-text-fill-color: transparent;
-}
-</style>
-
-<!--
-Here is another comment.
--->
-
----
-transition: slide-up
-level: 2
----
-
-# Navigation
-
-Hover on the bottom-left corner to see the navigation's controls panel, [learn more](https://sli.dev/guide/ui#navigation-bar)
-
-## Keyboard Shortcuts
-
-|                                                     |                             |
-| --------------------------------------------------- | --------------------------- |
-| <kbd>right</kbd> / <kbd>space</kbd>                 | next animation or slide     |
-| <kbd>left</kbd>  / <kbd>shift</kbd><kbd>space</kbd> | previous animation or slide |
-| <kbd>up</kbd>                                       | previous slide              |
-| <kbd>down</kbd>                                     | next slide                  |
-
-<!-- https://sli.dev/guide/animations.html#click-animation -->
-<img
-  v-click
-  class="absolute -bottom-9 -left-7 w-80 opacity-50"
-  src="https://sli.dev/assets/arrow-bottom-left.svg"
-  alt=""
-/>
-<p v-after class="absolute bottom-23 left-45 opacity-30 transform -rotate-10">Here!</p>
-
----
-layout: two-cols
-layoutClass: gap-16
----
-
-# Table of contents
-
-You can use the `Toc` component to generate a table of contents for your slides:
-
-```html
-<Toc minDepth="1" maxDepth="1" />
-```
-
-The title will be inferred from your slide content, or you can override it with `title` and `level` in your frontmatter.
+自己紹介
 
 ::right::
 
-<Toc text-sm minDepth="1" maxDepth="2" />
+画像
 
 ---
-layout: image-right
-image: https://cover.sli.dev
+layout: top-title
+color: amber
 ---
 
-# Code
+::title::
 
-Use code snippets and get the highlighting directly, and even types hover!
+# 本日のゴール
 
-```ts [filename-example.ts] {all|4|6|6-7|9|all} twoslash
-// TwoSlash enables TypeScript hover information
-// and errors in markdown code blocks
-// More at https://shiki.style/packages/twoslash
-import { computed, ref } from 'vue'
+::content::
 
-const count = ref(0)
-const doubled = computed(() => count.value * 2)
-
-doubled.value = 2
-```
-
-<arrow v-click="[4, 5]" x1="350" y1="310" x2="195" y2="342" color="#953" width="2" arrowSize="1" />
-
-<!-- This allow you to embed external code blocks -->
-<<< @/snippets/external.ts#snippet
-
-<!-- Footer -->
-
-[Learn more](https://sli.dev/features/line-highlighting)
-
-<!-- Inline style -->
-<style>
-.footnotes-sep {
-  @apply mt-5 opacity-10;
-}
-.footnotes {
-  @apply text-sm opacity-75;
-}
-.footnote-backref {
-  display: none;
-}
-</style>
-
-<!--
-Notes can also sync with clicks
-
-[click] This will be highlighted after the first click
-
-[click] Highlighted with `count = ref(0)`
-
-[click:3] Last click (skip two clicks)
--->
+- CDKの基本を理解する
+- サンプルコードでCDKを体験
+- 自分でWebアプリのインフラを構築
 
 ---
-level: 2
+layout: top-title
+color: amber
 ---
 
-# Shiki Magic Move
+::title::
 
-Powered by [shiki-magic-move](https://shiki-magic-move.netlify.app/), Slidev supports animations across multiple code snippets.
+# 事前準備の確認
 
-Add multiple code blocks and wrap them with <code>````md magic-move</code> (four backticks) to enable the magic move. For example:
+::content::
 
-````md magic-move {lines: true}
-```ts {*|2|*}
-// step 1
-const author = reactive({
-  name: 'John Doe',
-  books: [
-    'Vue 2 - Advanced Guide',
-    'Vue 3 - Basic Guide',
-    'Vue 4 - The Mystery'
-  ]
-})
-```
-
-```ts {*|1-2|3-4|3-4,8}
-// step 2
-export default {
-  data() {
-    return {
-      author: {
-        name: 'John Doe',
-        books: [
-          'Vue 2 - Advanced Guide',
-          'Vue 3 - Basic Guide',
-          'Vue 4 - The Mystery'
-        ]
-      }
-    }
-  }
-}
-```
-
-```ts
-// step 3
-export default {
-  data: () => ({
-    author: {
-      name: 'John Doe',
-      books: [
-        'Vue 2 - Advanced Guide',
-        'Vue 3 - Basic Guide',
-        'Vue 4 - The Mystery'
-      ]
-    }
-  })
-}
-```
-
-Non-code blocks are ignored.
-
-```vue
-<!-- step 4 -->
-<script setup>
-const author = {
-  name: 'John Doe',
-  books: [
-    'Vue 2 - Advanced Guide',
-    'Vue 3 - Basic Guide',
-    'Vue 4 - The Mystery'
-  ]
-}
-</script>
-```
-````
+- ✅ AWSアカウント（Admin権限）
+- ✅ ノートPC持参
 
 ---
+layout: top-title
+color: amber
+---
 
-# Components
+::title::
 
-<div grid="~ cols-2 gap-4">
-<div>
+# 本日の流れ
 
-You can use Vue components directly inside your slides.
+::content::
 
-We have provided a few built-in components like `<Tweet/>` and `<Youtube/>` that you can use directly. And adding your custom components is also super easy.
+1. ワークショップ環境の構築
+2. CDKの概要
+3. サンプルコードでCDKを動かす
+4. コードの中身を理解
+5. 自分でWebアプリのインフラを構築
+6. まとめ・質疑応答
 
-```html
-<Counter :count="10" />
-```
+---
+layout: top-title
+color: amber
+---
 
-<!-- ./components/Counter.vue -->
-<Counter :count="10" m="t-4" />
+::title::
 
-Check out [the guides](https://sli.dev/builtin/components.html) for more.
+# 本スライドのURL
 
-</div>
-<div>
+::content::
 
-```html
-<Tweet id="1390115482657726468" />
-```
+https://bit.ly/cdk-workshop-2025
 
-<Tweet id="1390115482657726468" scale="0.65" />
-
-</div>
+<div class="flex flex-col items-center">
+  <QRCode
+      :width="720"
+      :height="720"
+      value="https://bit.ly/cdk-workshop-2025"
+      image="./images/CDK_logo.png"
+  />
 </div>
 
-<!--
-Presenter note with **bold**, *italic*, and ~~striked~~ text.
-
-Also, HTML elements are valid:
-<div class="flex w-full">
-  <span style="flex-grow: 1;">Left content</span>
-  <span>Right content</span>
-</div>
--->
+<!-- SPAビルドしたスライドをCloudFrontで参照できるようにしておく -->
 
 ---
-class: px-20
+layout: top-title
+color: amber
 ---
 
-# Themes
+::title::
 
-Slidev comes with powerful theming support. Themes can provide styles, layouts, components, or even configurations for tools. Switching between themes by just **one edit** in your frontmatter:
+# Visual Studio Code Serverを構築しよう
 
-<div grid="~ cols-2 gap-2" m="t-2">
+::content::
 
-```yaml
----
-theme: default
----
-```
+**構築手順：**
 
-```yaml
----
-theme: seriph
----
-```
+1. 「TypeScript の基礎から始める AWS CDK 開発入門」にアクセス
+    - https://catalog.workshops.aws/typescript-and-cdk-for-beginner/ja-JP
 
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-default/01.png?raw=true" alt="">
+2. 左メニューから「開発環境のセットアップ」→「ご自身で実施するワークショップ」→「Visual Studio Code Server のセットアップ」にアクセス
 
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-seriph/01.png?raw=true" alt="">
+2. ”Asia Pacific (Tokyo) ap-northeast-1"の「Launch Stack」ボタンをクリック
 
-</div>
+3. 以降、ページに記載された手順に従って、Visual Studio Code IDEを表示するところまで進めてください。
 
-Read more about [How to use a theme](https://sli.dev/guide/theme-addon#use-theme) and
-check out the [Awesome Themes Gallery](https://sli.dev/resources/theme-gallery).
+※ デプロイには約8分程度かかります。
+
 
 ---
-
-# Clicks Animations
-
-You can add `v-click` to elements to add a click animation.
-
-<div v-click>
-
-This shows up when you click the slide:
-
-```html
-<div v-click>This shows up when you click the slide.</div>
-```
-
-</div>
-
-<br>
-
-<v-click>
-
-The <span v-mark.red="3"><code>v-mark</code> directive</span>
-also allows you to add
-<span v-mark.circle.orange="4">inline marks</span>
-, powered by [Rough Notation](https://roughnotation.com/):
-
-```html
-<span v-mark.underline.orange>inline markers</span>
-```
-
-</v-click>
-
-<div mt-20 v-click>
-
-[Learn more](https://sli.dev/guide/animations#click-animation)
-
-</div>
-
+layout: top-title
+color: amber
 ---
 
-# Motions
+::title::
 
-Motion animations are powered by [@vueuse/motion](https://motion.vueuse.org/), triggered by `v-motion` directive.
+# AWS CDKとは？
 
-```html
-<div
-  v-motion
-  :initial="{ x: -80 }"
-  :enter="{ x: 0 }"
-  :click-3="{ x: 80 }"
-  :leave="{ x: 1000 }"
->
-  Slidev
-</div>
-```
+::content::
 
-<div class="w-60 relative">
-  <div class="relative w-40 h-40">
-    <img
-      v-motion
-      :initial="{ x: 800, y: -100, scale: 1.5, rotate: -50 }"
-      :enter="final"
-      class="absolute inset-0"
-      src="https://sli.dev/logo-square.png"
-      alt=""
-    />
-    <img
-      v-motion
-      :initial="{ y: 500, x: -100, scale: 2 }"
-      :enter="final"
-      class="absolute inset-0"
-      src="https://sli.dev/logo-circle.png"
-      alt=""
-    />
-    <img
-      v-motion
-      :initial="{ x: 600, y: 400, scale: 2, rotate: 100 }"
-      :enter="final"
-      class="absolute inset-0"
-      src="https://sli.dev/logo-triangle.png"
-      alt=""
-    />
-  </div>
-
-  <div
-    class="text-5xl absolute top-14 left-40 text-[#2B90B6] -z-1"
-    v-motion
-    :initial="{ x: -80, opacity: 0}"
-    :enter="{ x: 0, opacity: 1, transition: { delay: 2000, duration: 1000 } }">
-    Slidev
-  </div>
-</div>
-
-<!-- vue script setup scripts can be directly used in markdown, and will only affects current page -->
-<script setup lang="ts">
-const final = {
-  x: 0,
-  y: 0,
-  rotate: 0,
-  scale: 1,
-  transition: {
-    type: 'spring',
-    damping: 10,
-    stiffness: 20,
-    mass: 2
-  }
-}
-</script>
-
-<div
-  v-motion
-  :initial="{ x:35, y: 30, opacity: 0}"
-  :enter="{ y: 0, opacity: 1, transition: { delay: 3500 } }">
-
-[Learn more](https://sli.dev/guide/animations.html#motion)
-
-</div>
-
----
-
-# LaTeX
-
-LaTeX is supported out-of-box. Powered by [KaTeX](https://katex.org/).
-
-<div h-3 />
-
-Inline $\sqrt{3x-1}+(1+x)^2$
-
-Block
-$$ {1|3|all}
-\begin{aligned}
-\nabla \cdot \vec{E} &= \frac{\rho}{\varepsilon_0} \\
-\nabla \cdot \vec{B} &= 0 \\
-\nabla \times \vec{E} &= -\frac{\partial\vec{B}}{\partial t} \\
-\nabla \times \vec{B} &= \mu_0\vec{J} + \mu_0\varepsilon_0\frac{\partial\vec{E}}{\partial t}
-\end{aligned}
-$$
-
-[Learn more](https://sli.dev/features/latex)
-
----
-
-# Diagrams
-
-You can create diagrams / graphs from textual descriptions, directly in your Markdown.
-
-<div class="grid grid-cols-4 gap-5 pt-4 -mb-6">
-
-```mermaid {scale: 0.5, alt: 'A simple sequence diagram'}
-sequenceDiagram
-    Alice->John: Hello John, how are you?
-    Note over Alice,John: A typical interaction
-```
-
-```mermaid {theme: 'neutral', scale: 0.8}
-graph TD
-B[Text] --> C{Decision}
-C -->|One| D[Result 1]
-C -->|Two| E[Result 2]
-```
+- AWS公式サポートの代表的なOSS IaCツール
+- AWSのインフラをTypeScriptなどの開発言語で記述できる
+  - TypeScript / JavaScript / Python / Java / C# / Golangに対応
+- 開発言語で記述したコードからCloudFormationテンプレートを生成し、デプロイ
+  - CloudFormationテンプレートの記法を覚える必要なく、慣れた言語でインフラを定義
 
 ```mermaid
-mindmap
-  root((mindmap))
-    Origins
-      Long history
-      ::icon(fa fa-book)
-      Popularisation
-        British popular psychology author Tony Buzan
-    Research
-      On effectiveness<br/>and features
-      On Automatic creation
-        Uses
-            Creative techniques
-            Strategic planning
-            Argument mapping
-    Tools
-      Pen and paper
-      Mermaid
+graph LR
+    CDK[CDKアプリケーション<br/>（各種開発言語）] -- synth --> CF[CloudFormation<br/>テンプレート]
+    CF -- deploy --> AWS[AWSリソース]
 ```
 
-```plantuml {scale: 0.7}
-@startuml
+---
+layout: top-title-two-cols
+color: amber
+align: l-lt-lt
+---
 
-package "Some Group" {
-  HTTP - [First Component]
-  [Another Component]
-}
+::title::
 
-node "Other Groups" {
-  FTP - [Second Component]
-  [First Component] --> FTP
-}
+# CDKの多言語対応例
 
-cloud {
-  [Example 1]
-}
+::left::
 
-database "MySql" {
-  folder "This is my folder" {
-    [Folder 3]
+## TypeScript
+
+```ts
+export class S3Stack extends cdk.Stack {
+  constructor(scope: Construct, id: string,
+   props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    const bucket = new s3.Bucket(this, 'MyBucket', {
+      bucketName: 'my-example-bucket-12345',
+      versioned: true,
+      publicReadAccess: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    new cdk.CfnOutput(this, 'BucketName', {
+      value: bucket.bucketName
+    });
   }
-  frame "Foo" {
-    [Frame 4]
-  }
 }
-
-[Another Component] --> [Example 1]
-[Example 1] --> [Folder 3]
-[Folder 3] --> [Frame 4]
-
-@enduml
 ```
 
+::right::
+
+## Python
+
+```python
+class S3Stack(Stack):
+    def __init__(self, scope: Construct, 
+      construct_id: str, **kwargs) -> None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        bucket = s3.Bucket(self, "MyBucket",
+            bucket_name="my-example-bucket-12345",
+            versioned=True,
+            public_read_access=False,
+            removal_policy=RemovalPolicy.DESTROY,
+            auto_delete_objects=True
+        )
+
+        CfnOutput(self, "BucketName",
+            value=bucket.bucket_name
+        )
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 体験：サンプルコードでCDKを動かしてみよう
+
+::content::
+
+事前に用意した翻訳Webアプリのサンプルコードを使って、CDKの威力を体験しましょう！
+
+**手順：**
+1. リポジトリをクローン
+2. 依存関係をインストール
+3. CDKコマンドでデプロイ
+4. AWS上にリソースが作られる様子を確認
+5. 実際にWebアプリを動かしてみる
+
+**所要時間：** 約10-15分
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# サンプルコードのアーキテクチャ
+
+::content::
+
+<br/>
+<br/>
+
+```mermaid
+%%{init: {'theme':'default', 'look': 'handDrawn'}}%%
+graph LR
+  subgraph "フロントエンド"
+    A["Webブラウザ"]
+  end
+
+  subgraph "バックエンド"
+    B[("S3バケット<br/>(HTMLアプリ静的ホスティング)")]
+    C["API Gateway"]
+    D["Lambda関数<br/>(翻訳処理)"]
+    E["Amazon Translate"]
+    F["Amazon Comprehend"]
+    A-->|"Webページ取得<br/>(GET /)"|C
+    C-->|"S3直接統合"|B
+    B-->|"HTMLファイル"|C
+    C-->|"Webページ"|A
+    A-->|"翻訳リクエスト<br/>(POST /translate)"|C
+    C-->|"Lambda呼び出し"|D
+    D-->|"翻訳リクエスト<br/>(sourceLang: auto)"|E
+    E-->|"言語検出要求"|F
+    F-->|"検出された言語"|E
+    E-->|"翻訳結果"|D
+    D-->|"レスポンス"|C
+    C-->|"APIレスポンス"|A
+  end
+```
+
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 実行手順
+
+::content::
+
+<!-- 実際にVSCodeの画面で見せる -->
+
+## 1. リポジトリクローン
+
+```bash {lines:false}
+git clone https://github.com/niizawat/cdk-workshop-example.git
+cd cdk-workshop-example
+```
+
+## 2. 依存関係インストール
+
+```bash {lines:false}
+npm install
+```
+
+## 3. CDK Bootstrap (初回のみ)
+
+CDKアプリケーションをデプロイする際に必要なリソース(S3バケット, ECRリポジトリ, IAMロールなど)を作成
+
+```bash {lines:false}
+npx cdk bootstrap
+```
+
+## 4. CDK動作確認 (CDKコードをCloudFormationテンプレートに変換)
+
+生成されたCloudFormationテンプレートが表示されればOK
+
+```bash {lines:false}
+cdk synth
+```
+## 5. AWSへデプロイ
+
+```bash {lines:false}
+cdk deploy
+```
+
+```
+........
+Do you wish to deploy these changes (y/n)?  <-- yを入力
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# デプロイ後 の出力例
+
+::content::
+
+```bash {lines:false}
+AppStack: deploying... [1/1]
+AppStack: creating CloudFormation changeset...
+
+ ✅  AppStack
+
+✨  Deployment time: 94.21s
+
+Outputs:
+AppStack.ApiGatewayURL = https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/
+AppStack.BucketName = translate-website-123456789012-ap-northeast-1
+AppStack.TranslateApiEndpointBF4D5864 = https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/
+AppStack.WebsiteURL = https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/
+Stack ARN:
+arn:aws:cloudformation:ap-northeast-1:123456789012:stack/AppStack/d9b61de0-5485-11f0-a14f-06c66a81218f
+
+✨  Total time: 97.31s
+```
+
+---
+layout: top-title-two-cols
+color: amber
+align: l-lt-lt
+---
+
+::title::
+# デプロイ後の動作確認
+
+::left::
+
+1. **Webアプリにアクセス**
+   - ブラウザで `Website URL`にアクセス
+   - アプリの画面が表示されることを確認
+
+2. **翻訳APIのテスト**
+   - ブラウザ上で翻訳機能を試す
+
+::right::
+
+![画像](./images/demo.png)
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# CDKアプリケーションの基本的なディレクトリ構造
+
+::content::
+
+```sh {lines:false}
+├── bin/
+│   └── cdk.ts          # CDKアプリのエントリーポイント
+├── lib/
+│   └── app-stack.ts    # スタック定義（メインのインフラコード）
+├── test/               # テストファイル格納ディレクトリ
+├── cdk.json           # CDKプロジェクトの設定ファイル
+├── jest.config.js      # テスト設定ファイル
+└── tsconfig.json      # TypeScript設定ファイル
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# CDKアプリのエントリーポイント
+
+::content::
+
+`bin/cdk.ts` はCDKアプリケーションのメインエントリーポイントです
+
+```ts
+#!/usr/bin/env node
+import * as cdk from 'aws-cdk-lib';
+import { AppStack } from '../lib/app-stack';
+
+const app = new cdk.App();
+new AppStack(app, 'AppStack', {
+  /* 環境設定のオプション */
+  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+  // env: { account: '123456789012', region: 'us-east-1' },
+});
+```
+
+**各行の解説：**
+- `import * as cdk` - AWS CDKのコアライブラリを読み込み
+- `import { AppStack }` - 自作のスタック定義を読み込み
+- `new cdk.App()` - CDKアプリケーションのインスタンスを作成
+- `new AppStack()` - スタックをアプリに追加
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# CDKスタックの定義
+
+::content::
+
+`lib/app-stack.ts`
+
+```ts {monaco} { height:'400px', editorOptions: { lineNumbers: 'on', minimap: 'enable' } }
+import * as cdk from 'aws-cdk-lib';
+import {
+  aws_s3 as s3,
+  aws_lambda as lambda,
+  aws_apigateway as apigateway,
+  aws_iam as iam,
+  aws_s3_deployment as s3deploy,
+} from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+
+export class AppStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // S3バケット（静的ファイル保存用）
+    const websiteBucket = new s3.Bucket(this, 'TranslateWebsiteBucket', {
+      bucketName: `translate-website-${this.account}-${this.region}`,
+      publicReadAccess: false, // API Gateway経由でアクセスするためpublicアクセスは無効
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // バケット削除時にオブジェクトも削除
+      autoDeleteObjects: true, // バケット削除時にオブジェクトも削除
+    });
+
+    // フロントエンドファイルのデプロイ
+    new s3deploy.BucketDeployment(this, 'DeployWebsite', {
+      sources: [s3deploy.Source.asset('./frontend')],
+      destinationBucket: websiteBucket,
+    });
+    
+    
+    // Lambda関数（翻訳処理用）
+    const translateFunction = new lambda.Function(this, 'TranslateFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/translate'),
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    // Lambda関数にTranslateとComprehendの権限を付与
+    translateFunction.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'translate:TranslateText',
+        'comprehend:DetectDominantLanguage'
+      ],
+      resources: ['*']
+    }));
+
+
+    // API Gateway（REST API）
+    const api = new apigateway.RestApi(this, 'TranslateApi', {
+      restApiName: 'Translate Service',
+      description: 'AWS Translateを使用した翻訳API',
+      // バイナリメディアタイプを設定（画像、CSS、JSファイルなど）
+      binaryMediaTypes: [
+        'image/*',
+        'text/css',
+        'application/javascript',
+        'application/json',
+        'text/html',
+        'text/plain',
+        'font/*'
+      ]
+    });
+
+    // 翻訳用Lambda統合
+    const translateIntegration = new apigateway.LambdaIntegration(translateFunction);
+
+    // /translateエンドポイントの作成
+    const translateResource = api.root.addResource('translate');
+    translateResource.addMethod('POST', translateIntegration);
+
+    // API GatewayがS3にアクセスするためのIAMロール
+    const apiGatewayS3AccessRole = new iam.Role(this, 'ApiGatewayS3AccessRole', {
+      assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
+    });
+
+    // S3バケットの読み取りをAPI Gatewayに許可
+    websiteBucket.grantRead(apiGatewayS3AccessRole);
+
+    // ルートパス（/）用のS3統合 - S3バケットのindex.htmlを返す
+    const rootIntegration = new apigateway.AwsIntegration({
+      service: 's3',
+      integrationHttpMethod: 'GET',
+      path: `${websiteBucket.bucketName}/index.html`,
+      options: {
+        credentialsRole: apiGatewayS3AccessRole,
+        passthroughBehavior: apigateway.PassthroughBehavior.WHEN_NO_TEMPLATES,
+        integrationResponses: [
+          {
+            statusCode: '200',
+            responseParameters: {
+              'method.response.header.Content-Type': 'integration.response.header.Content-Type',
+              'method.response.header.Content-Length': 'integration.response.header.Content-Length',
+              'method.response.header.Timestamp': 'integration.response.header.Date'
+            }
+          },
+          {
+            statusCode: '400',
+            selectionPattern: '4\\d{2}'
+          },
+          {
+            statusCode: '500',
+            selectionPattern: '5\\d{2}'
+          }
+        ]
+      }
+    });
+
+    api.root.addMethod('GET', rootIntegration, {
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Content-Type': true,
+            'method.response.header.Content-Length': true,
+            'method.response.header.Timestamp': true
+          }
+        },
+        {
+          statusCode: '400'
+        },
+        {
+          statusCode: '500'
+        }
+      ]
+    });
+
+    // 静的ファイル配信用のプロキシリソース（S3直接統合）
+    const proxyIntegration = new apigateway.AwsIntegration({
+      service: 's3',
+      integrationHttpMethod: 'GET',
+      path: `${websiteBucket.bucketName}/{proxy}`,
+      options: {
+        credentialsRole: apiGatewayS3AccessRole,
+        passthroughBehavior: apigateway.PassthroughBehavior.WHEN_NO_TEMPLATES,
+        requestParameters: {
+          'integration.request.path.proxy': 'method.request.path.proxy'
+        },
+        integrationResponses: [
+          {
+            statusCode: '200',
+            responseParameters: {
+              'method.response.header.Content-Type': 'integration.response.header.Content-Type',
+              'method.response.header.Content-Length': 'integration.response.header.Content-Length',
+              'method.response.header.Timestamp': 'integration.response.header.Date'
+            }
+          },
+          {
+            statusCode: '400',
+            selectionPattern: '4\\d{2}'
+          },
+          {
+            statusCode: '500',
+            selectionPattern: '5\\d{2}'
+          }
+        ]
+      }
+    });
+
+    const proxyResource = api.root.addResource('{proxy+}');
+    proxyResource.addMethod('GET', proxyIntegration, {
+      requestParameters: {
+        'method.request.path.proxy': true
+      },
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Content-Type': true,
+            'method.response.header.Content-Length': true,
+            'method.response.header.Timestamp': true
+          }
+        },
+        {
+          statusCode: '400'
+        },
+        {
+          statusCode: '500'
+        }
+      ]
+    });
+
+    // 出力値の設定
+    new cdk.CfnOutput(this, 'WebsiteURL', {
+      value: api.url,
+      description: 'Website URL (via API Gateway)'
+    });
+
+    new cdk.CfnOutput(this, 'ApiGatewayURL', {
+      value: api.url,
+      description: 'API Gateway URL'
+    });
+
+    new cdk.CfnOutput(this, 'BucketName', {
+      value: websiteBucket.bucketName,
+      description: 'S3 Bucket Name'
+    });
+
+  }
+}
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ハンズオン：シンプルなAPIを作ってみよう
+
+::content::
+
+まずは基本から！Hello WorldのAPIを作成しましょう
+
+**使用するAWSサービス：**
+
+- API Gateway（APIエンドポイント）
+- Lambda（Hello World処理）
+
+**作成するAPI：**
+- `GET /hello` → `Hello, World!`を返す
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# CDKプロジェクトの作成
+
+::content::
+
+```bash
+# 新しいディレクトリを作成
+mkdir my-hello-api
+cd my-hello-api
+
+# CDKプロジェクトを初期化
+cdk init app --language typescript
+
+# 必要なパッケージをインストール
+npm install
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# Lambda関数を作成しよう
+
+::content::
+
+Lambda = サーバーレスでコードを実行
+
+まず、Lambda関数のコードファイルを作成します：
+
+```bash
+# Lambdaコード用のディレクトリを作成
+mkdir -p lambda/hello
+
+# Lambda関数のファイルを作成
+touch lambda/hello/index.js
+```
+
+`lambda/hello/index.js` をエディタで開き、以下のコードを入力してください：
+
+```js {monaco} { editorOptions: { lineNumbers: 'on' } }
+exports.handler = async (event) => {
+  return {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: 'Hello, World!',
+      timestamp: new Date().toISOString()
+    })
+  };
+};
+```
+
+次に、`lib/my-hello-api-stack.ts`を以下のように変更してLambda関数を定義します：
+
+```ts {monaco} { editorOptions: { lineNumbers: 'on' } }
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { Construct } from 'constructs';
+
+export class HelloApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // Lambda関数（Hello World処理用）
+    const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/hello'),
+    });
+  }
+}
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# API Gatewayを作成しよう
+
+::content::
+
+```ts {3|16-33}{ maxHeight:'400px'}
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import { Construct } from 'constructs';
+
+export class HelloApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // Lambda関数（Hello World処理用）
+    const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/hello'),
+    });
+    // API Gateway（REST API）
+    const api = new apigateway.RestApi(this, 'HelloApi', {
+      restApiName: 'Hello World API',
+      description: 'シンプルなHello World API',
+    });
+
+    // Lambda統合
+    const helloIntegration = new apigateway.LambdaIntegration(helloFunction);
+
+    // /helloエンドポイントの作成
+    const helloResource = api.root.addResource('hello');
+    helloResource.addMethod('GET', helloIntegration);
+
+    // 出力値の設定
+    new cdk.CfnOutput(this, 'ApiUrl', {
+      value: api.url,
+      description: 'API Gateway URL'
+    });
+  }
+}
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 動作確認してみよう
+
+::content::
+
+```bash {lines:false}
+# デプロイ
+cdk deploy
+
+# API Gateway URLにアクセス
+curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
+
+# レスポンス例
+{
+  "message": "Hello, World!",
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 🎉 おめでとうございます！
+
+::content::
+
+CDKを使ってシンプルなAPIを作成できました！
+
+**できたこと：**
+- Lambda関数の作成
+- API Gatewayの作成
+- CDKでのデプロイ
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 🚀 発展課題にチャレンジ！
+
+::content::
+
+以下の課題にチャレンジしてみましょう：
+
+**レベル3：外部サービス連携**
+- Amazon Translateを使った翻訳API
+- DynamoDBを使ったデータ保存API
+- S3を使ったファイルアップロードAPI
+
+API Documentのリンク
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 発展課題：Amazon Translate API
+
+::content::
+
+```ts {monaco} { editorOptions: { lineNumbers: 'on' } }
+// Lambda関数にTranslateとComprehendの権限を付与
+translateFunction.addToRolePolicy(new iam.PolicyStatement({
+  effect: iam.Effect.ALLOW,
+  actions: [
+    'translate:TranslateText',
+    'comprehend:DetectDominantLanguage'
+  ],
+  resources: ['*']
+}));
+
+// /translateエンドポイントの作成
+const translateResource = api.root.addResource('translate');
+translateResource.addMethod('POST', new apigateway.LambdaIntegration(translateFunction));
+```
+
+**Lambda関数の例：**
+```js
+const { TranslateClient, TranslateTextCommand } = require('@aws-sdk/client-translate');
+
+exports.handler = async (event) => {
+  const { text, targetLang = 'ja' } = JSON.parse(event.body);
+  
+  const translateClient = new TranslateClient({ region: process.env.AWS_REGION });
+  const result = await translateClient.send(new TranslateTextCommand({
+    Text: text,
+    SourceLanguageCode: 'auto',
+    TargetLanguageCode: targetLang
+  }));
+  
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ translatedText: result.TranslatedText })
+  };
+};
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 片付け（重要！）
+
+::content::
+
+作成したリソースを削除して、課金を防ぎましょう
+
+```bash {lines:false}
+# リソースを削除
+cdk destroy
+```
+
+<br/>
+
+VSCode Serverを削除（ご自分のアカウントを利用された方）
+
+- AWSマネジメントコンソールでCloudFormationコンソールにアクセス
+- `vscode-server`スタックを選択して、削除ボタンをクリック
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# まとめ
+
+::content::
+
+**今日学んだこと：**
+
+- CDKでインフラをコードで管理する方法
+- TypeScriptでAWSリソースを定義する書き方
+- デプロイから削除までの一連の流れ
+
+**CDKの魅力：**
+
+- 可読性が高い
+- 再利用可能
+- バージョン管理できる
+- チームで共有しやすい
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# さらに学ぶために
+
+::content::
+
+- **AWS CDK公式ドキュメント**: <https://docs.aws.amazon.com/cdk/>
+- **AWS CDK Workshop**: <https://cdkworkshop.com/>
+- **CDK Examples**: <https://github.com/aws-samples/aws-cdk-examples>
+- **AWS Solutions Constructs**: <https://docs.aws.amazon.com/solutions/latest/constructs/welcome.html>
+- **Construct Hub**: <https://constructs.dev/>
+- **Amazon Q Developer CLI ではじめる、効率的なアプリケーション開発**: <https://aws.amazon.com/jp/builders-flash/202505/q-developer-cli-app-development/>
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 質疑応答
+
+::content::
+
+ご質問をお聞かせください！
+
+- CDKに関する疑問
+- 今日のハンズオンについて
+- 実際の現場での活用方法
+- etc.
+
+---
+layout: top-title
+color: amber
+addons:
+  - - "@katzumi/slidev-addon-qrcode"
+---
+
+::title::
+
+# ありがとうございました
+
+::content::
+
+お疲れさまでした！
+皆さんの今後のAWS CDK活用を応援しています 🎉
+
+**アンケートのご協力をお願いします**
+
+<br/>
+<br/>
+
+<div class="flex flex-col items-center">
+  <QRCode
+      :width="720"
+      :height="720"
+      value="https://sli.dev"
+      image="./images/CDK_logo.png"
+  />
 </div>
-
-Learn more: [Mermaid Diagrams](https://sli.dev/features/mermaid) and [PlantUML Diagrams](https://sli.dev/features/plantuml)
-
----
-foo: bar
-dragPos:
-  square: 691,32,167,_,-16
----
-
-# Draggable Elements
-
-Double-click on the draggable elements to edit their positions.
-
-<br>
-
-###### Directive Usage
-
-```md
-<img v-drag="'square'" src="https://sli.dev/logo.png">
-```
-
-<br>
-
-###### Component Usage
-
-```md
-<v-drag text-3xl>
-  <div class="i-carbon:arrow-up" />
-  Use the `v-drag` component to have a draggable container!
-</v-drag>
-```
-
-<v-drag pos="663,206,261,_,-15">
-  <div text-center text-3xl border border-main rounded>
-    Double-click me!
-  </div>
-</v-drag>
-
-<img v-drag="'square'" src="https://sli.dev/logo.png">
-
-###### Draggable Arrow
-
-```md
-<v-drag-arrow two-way />
-```
-
-<v-drag-arrow pos="67,452,253,46" two-way op70 />
-
----
-src: ./pages/imported-slides.md
-hide: false
----
-
----
-
-# Monaco Editor
-
-Slidev provides built-in Monaco Editor support.
-
-Add `{monaco}` to the code block to turn it into an editor:
-
-```ts {monaco}
-import { ref } from 'vue'
-import { emptyArray } from './external'
-
-const arr = ref(emptyArray(10))
-```
-
-Use `{monaco-run}` to create an editor that can execute the code directly in the slide:
-
-```ts {monaco-run}
-import { version } from 'vue'
-import { emptyArray, sayHello } from './external'
-
-sayHello()
-console.log(`vue ${version}`)
-console.log(emptyArray<number>(10).reduce(fib => [...fib, fib.at(-1)! + fib.at(-2)!], [1, 1]))
-```
-
----
-layout: center
-class: text-center
----
-
-# Learn More
-
-[Documentation](https://sli.dev) · [GitHub](https://github.com/slidevjs/slidev) · [Showcases](https://sli.dev/resources/showcases)
-
-<PoweredBySlidev mt-10 />
