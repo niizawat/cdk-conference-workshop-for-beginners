@@ -283,47 +283,52 @@ color: amber
 
 ::title::
 
-# 実行手順
+# 実行手順 １（初回のみ）
 
 ::content::
 
-<!-- 実際にVSCodeの画面で見せる -->
+1. リポジトリクローン
 
-## 1. リポジトリクローン
-
-```bash {lines:false}
+```bash
 git clone https://github.com/niizawat/cdk-workshop-example.git
 cd cdk-workshop-example
 ```
 
-## 2. 依存関係インストール
+2. 依存関係インストール
 
-```bash {lines:false}
+```bash
 npm install
 ```
 
-## 3. CDK Bootstrap (初回のみ)
+3. CDK Bootstrap
 
-CDKアプリケーションをデプロイする際に必要なリソース(S3バケット, ECRリポジトリ, IAMロールなど)を作成
-
-```bash {lines:false}
+```bash
 npx cdk bootstrap
+# CDKアプリケーションをデプロイする際に必要なリソースを作成
 ```
 
-## 4. CDK動作確認 (CDKコードをCloudFormationテンプレートに変換)
+---
+layout: top-title
+color: amber
+---
 
-生成されたCloudFormationテンプレートが表示されればOK
+::title::
 
-```bash {lines:false}
+# 実行手順 ２
+
+::content::
+
+4. CDK動作確認 (CDKコードをCloudFormationテンプレートに変換）
+
+```bash
 cdk synth
+# 生成されたCloudFormationテンプレートが表示されればOK
 ```
-## 5. AWSへデプロイ
 
-```bash {lines:false}
+5. AWSへデプロイ
+
+```bash
 cdk deploy
-```
-
-```
 ........
 Do you wish to deploy these changes (y/n)?  <-- yを入力
 ```
