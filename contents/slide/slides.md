@@ -8,7 +8,7 @@ layout: cover
 lineNumbers: true
 ---
 
-# AWS CDKワークショップ
+# AWS CDK初心者ワークショップ
 
 ::note::
 
@@ -98,7 +98,7 @@ https://bit.ly/cdk-workshop-2025
   <QRCode
       :width="720"
       :height="720"
-      value="https://bit.ly/cdk-workshop-2025"
+      value="http://bit.ly/4nz3B7d"
       image="./images/CDK_logo.png"
   />
 </div>
