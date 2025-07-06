@@ -64,7 +64,7 @@ color: amber
 - ✅ ノートPC持参
 
 ---
-layout: top-title
+layout: top-title-two-cols
 color: amber
 ---
 
@@ -72,28 +72,27 @@ color: amber
 
 # 本日の流れ
 
-::content::
+::left::
 
-1. ワークショップ環境の構築
+<!-- Visual Studio Code Serverの構築に時間がかかるので最初にやってもらいます -->
+
+<br/>
+<br/>
+
+1. Visual Studio Code Server環境の構築
 2. CDKの概要
 3. サンプルコードでCDKを動かす
 4. コードの中身を理解
 5. 自分でWebアプリのインフラを構築
 6. まとめ・質疑応答
 
----
-layout: top-title
-color: amber
----
+::right::
 
-::title::
-
-# 本スライドのURL
-
-::content::
+**本スライドのURL**:
 
 https://bit.ly/cdk-workshop-2025
-
+<br/>
+<br/>
 <div class="flex flex-col items-center">
   <QRCode
       :width="720"
@@ -103,8 +102,10 @@ https://bit.ly/cdk-workshop-2025
   />
 </div>
 
-<!-- SPAビルドしたスライドをCloudFrontで参照できるようにしておく -->
-
+<!-- 
+本日ワークショップの作業を行うVSCode Serverを構築してもらいます。<br/>
+このデプロイに時間がかかるので、これを待っている間にCDKについての簡単な説明をさせていただこうと思います。
+ -->
 ---
 layout: top-title
 color: amber
@@ -115,6 +116,8 @@ color: amber
 # Visual Studio Code Serverを構築しよう
 
 ::content::
+
+準備いただいたAWSアカウントにVisual Studio Code Serverを構築します。
 
 **構築手順：**
 
@@ -145,7 +148,7 @@ color: amber
 - AWSのインフラをTypeScriptなどの開発言語で記述できる
   - TypeScript / JavaScript / Python / Java / C# / Golangに対応
 - 開発言語で記述したコードからCloudFormationテンプレートを生成し、デプロイ
-  - CloudFormationテンプレートの記法を覚える必要なく、慣れた言語でインフラを定義
+  - CloudFormationテンプレートの記法を覚えることなく、慣れた言語でインフラを定義
 
 ```mermaid
 graph LR
@@ -222,10 +225,10 @@ color: amber
 
 ::content::
 
-事前に用意した翻訳Webアプリのサンプルコードを使って、CDKの威力を体験しましょう！
+まずは、事前に用意した翻訳Webアプリのサンプルコードを使って、CDKを体験してみましょう！
 
 **手順：**
-1. リポジトリをクローン
+1. サンプルリポジトリをクローン
 2. 依存関係をインストール
 3. CDKコマンドでデプロイ
 4. AWS上にリソースが作られる様子を確認
@@ -275,6 +278,12 @@ graph LR
   end
 ```
 
+<div class="flex justify-center">
+  <figure>
+    <img src="./images/demo.png" width="300" height="300" />
+    <figcaption style="font-size: 10pt; text-align: center;">フロントエンド</figcaption>
+  </figure>
+</div>
 
 ---
 layout: top-title
@@ -289,19 +298,23 @@ color: amber
 
 1. リポジトリクローン
 
-```bash
+```bash 
 git clone https://github.com/niizawat/cdk-workshop-example.git
 cd cdk-workshop-example
 ```
+
+<br/>
 
 2. 依存関係インストール
 
 ```bash
 npm install
 ```
+<br/>
 
 3. CDK Bootstrap
 
+  CDKアプリケーションをデプロイする際に必要なリソースを作成
 ```bash
 npx cdk bootstrap
 # CDKアプリケーションをデプロイする際に必要なリソースを作成
@@ -324,6 +337,17 @@ color: amber
 cdk synth
 # 生成されたCloudFormationテンプレートが表示されればOK
 ```
+
+<br/>
+
+5. デプロイ内容の差分の確認（Optional）
+
+```bash
+cdk diff
+# 生成されたCloudFormationテンプレートと現在のスタックの差分を表示
+```
+
+<br/>
 
 5. AWSへデプロイ
 
@@ -384,6 +408,10 @@ align: l-lt-lt
 ::right::
 
 ![画像](./images/demo.png)
+
+<!-- 
+Website URLは、前のスライドの出力例に表示されているURL
+ -->
 
 ---
 layout: top-title
