@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "slidev build && npx cpy 'images/**' 'dist/images/'",
-    "dev": "slidev --open slide-workshop.md",
+    "dev": "slidev --open slides.md",
     "export": "slidev export"
   },
   "dependencies": {
