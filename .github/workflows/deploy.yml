@@ -36,7 +36,40 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22'
-        cache: 'npm'
+    
+    # === node_modulesキャッシュ設定 ===
+    # 各プロジェクトのnode_modulesを個別にキャッシュして、
+    # 一つのプロジェクトの依存関係が変わっても他のキャッシュは有効のまま
+    
+    # ルートディレクトリのnode_modulesをキャッシュ
+    - name: ルートディレクトリのnode_modulesをキャッシュ
+      uses: actions/cache@v4
+      id: cache-root-node-modules
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-root-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-root-
+    
+    # Slidevプロジェクトのnode_modulesをキャッシュ
+    - name: Slidevプロジェクトのnode_modulesをキャッシュ
+      uses: actions/cache@v4
+      id: cache-slide-node-modules
+      with:
+        path: contents/slide/node_modules
+        key: ${{ runner.os }}-node-slide-${{ hashFiles('contents/slide/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-slide-
+    
+    # Websiteプロジェクトのnode_modulesをキャッシュ
+    - name: Websiteプロジェクトのnode_modulesをキャッシュ
+      uses: actions/cache@v4
+      id: cache-website-node-modules
+      with:
+        path: website/node_modules
+        key: ${{ runner.os }}-node-website-${{ hashFiles('website/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-website-
     
     - name: AWS認証情報を設定（OIDC）
       uses: aws-actions/configure-aws-credentials@v4
@@ -47,18 +80,33 @@ jobs:
         # セキュリティ強化：セッションの有効期限を短く設定
         role-duration-seconds: 1800
     
+    - name: キャッシュ状態を確認
+      run: |
+        echo "=== キャッシュ状態の確認 ==="
+        echo "ルートディレクトリキャッシュ: ${{ steps.cache-root-node-modules.outputs.cache-hit == 'true' && 'ヒット' || 'ミス' }}"
+        echo "Slidevプロジェクトキャッシュ: ${{ steps.cache-slide-node-modules.outputs.cache-hit == 'true' && 'ヒット' || 'ミス' }}"
+        echo "Websiteプロジェクトキャッシュ: ${{ steps.cache-website-node-modules.outputs.cache-hit == 'true' && 'ヒット' || 'ミス' }}"
+        echo "=== キャッシュ状態の確認完了 ==="
+    
     - name: AWS認証情報を検証
       run: |
         aws sts get-caller-identity
         echo "AWS認証情報の検証が完了しました"
     
     - name: ルートディレクトリの依存関係をインストール
-      run: npm ci
+      if: steps.cache-root-node-modules.outputs.cache-hit != 'true'
+      run: |
+        echo "=== ルートディレクトリの依存関係をインストール ==="
+        npm ci
+        echo "=== ルートディレクトリの依存関係インストール完了 ==="
     
     - name: Slidevプロジェクトの依存関係をインストール
+      if: steps.cache-slide-node-modules.outputs.cache-hit != 'true'
       run: |
+        echo "=== Slidevプロジェクトの依存関係をインストール ==="
         cd contents/slide
         npm ci
+        echo "=== Slidevプロジェクトの依存関係インストール完了 ==="
     
     - name: Slidevでスライドをビルド
       run: |
@@ -79,9 +127,12 @@ jobs:
         fi
     
     - name: Websiteプロジェクトの依存関係をインストール
+      if: steps.cache-website-node-modules.outputs.cache-hit != 'true'
       run: |
+        echo "=== Websiteプロジェクトの依存関係をインストール ==="
         cd website
         npm ci
+        echo "=== Websiteプロジェクトの依存関係インストール完了 ==="
     
     - name: CDKバージョンを確認
       run: |
@@ -127,6 +178,7 @@ jobs:
         echo "- リソース名の競合"
         echo "- 依存関係の問題"
         echo "- OIDCプロバイダーの設定"
+        echo "- キャッシュの破損（上記のキャッシュ状態を確認）"
 
 env:
   # CDKの設定
