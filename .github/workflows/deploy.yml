@@ -9,6 +9,7 @@ on:
     branches: [ main ]
     paths:
       - 'contents/slide/slides.md'
+  workflow_dispatch:  # 手動実行を可能にする
 
 # 同時実行を制限してデプロイの競合を防ぐ
 concurrency:
