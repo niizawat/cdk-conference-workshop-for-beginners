@@ -3,8 +3,12 @@ name: スライドビルドとCDKデプロイ
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'contents/slide/slides.md'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'contents/slide/slides.md'
 
 # 同時実行を制限してデプロイの競合を防ぐ
 concurrency:
