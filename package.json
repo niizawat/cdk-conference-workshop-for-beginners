@@ -16,7 +16,8 @@
     "test:website": "cd website && npm test",
     "test:test": "cd test && npm test",
     "clean": "rm -rf node_modules cdk/node_modules contents/slide/node_modules website/node_modules test/node_modules",
-    "clean:dist": "rm -rf contents/slide/dist cdk/cdk.out website/cdk.out test/cdk.out"
+    "clean:dist": "rm -rf contents/slide/dist cdk/cdk.out website/cdk.out test/cdk.out",
+    "cleanup:website": "./scripts/cleanup-website.sh"
   },
   "dependencies": {
     "slidev-theme-neversink": "^0.3.6"
