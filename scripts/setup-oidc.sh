@@ -139,23 +139,14 @@ create_iam_policy() {
                 "cloudformation:*",
                 "s3:*",
                 "cloudfront:*",
-                "iam:CreateRole",
-                "iam:DeleteRole",
-                "iam:AttachRolePolicy",
-                "iam:DetachRolePolicy",
-                "iam:PutRolePolicy",
-                "iam:DeleteRolePolicy",
-                "iam:GetRole",
-                "iam:GetRolePolicy",
-                "iam:PassRole",
-                "iam:TagRole",
-                "iam:UntagRole",
-                "ssm:GetParameter",
-                "ssm:GetParameters",
+                "ecr:*",
+                "iam:*",
+                "ssm:*",
                 "lambda:*",
                 "apigateway:*",
                 "translate:*",
-                "comprehend:*"
+                "comprehend:*",
+                "sts:*"
             ],
             "Resource": "*"
         }
@@ -166,8 +157,29 @@ EOF
     
     # 既存のポリシーを確認
     if aws iam get-policy --policy-arn "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/${POLICY_NAME}" &> /dev/null; then
-        print_warning "IAMポリシー '${POLICY_NAME}' は既に存在します。スキップします。"
+        print_warning "IAMポリシー '${POLICY_NAME}' は既に存在します。"
         POLICY_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:policy/${POLICY_NAME}"
+        
+        # 新しいポリシーバージョンを作成
+        print_info "ポリシーを最新バージョンに更新しています..."
+        
+        # 現在のデフォルトバージョンを取得
+        CURRENT_VERSION=$(aws iam get-policy --policy-arn "${POLICY_ARN}" --query 'Policy.DefaultVersionId' --output text)
+        
+        # 新しいバージョンを作成
+        NEW_VERSION=$(aws iam create-policy-version \
+            --policy-arn "${POLICY_ARN}" \
+            --policy-document "${POLICY_DOCUMENT}" \
+            --set-as-default \
+            --query 'PolicyVersion.VersionId' \
+            --output text)
+        
+        print_success "ポリシーが更新されました: ${POLICY_ARN} (新バージョン: ${NEW_VERSION})"
+        
+        # 古いバージョンを削除（最大5バージョンまで保持可能）
+        if [[ "${CURRENT_VERSION}" != "v1" ]]; then
+            aws iam delete-policy-version --policy-arn "${POLICY_ARN}" --version-id "${CURRENT_VERSION}" 2>/dev/null || true
+        fi
     else
         print_info "IAMポリシーを作成しています..."
         
