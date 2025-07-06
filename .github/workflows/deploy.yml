@@ -1,0 +1,135 @@
+name: スライドビルドとCDKデプロイ
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# 同時実行を制限してデプロイの競合を防ぐ
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+# OIDCトークンを取得するための権限設定
+permissions:
+  id-token: write   # OIDCトークンの取得に必要
+  contents: read    # リポジトリの読み取りに必要
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    # 実行時間を制限（30分）
+    timeout-minutes: 30
+    
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+    
+    - name: Node.js 22.xをセットアップ
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+    
+    - name: AWS認証情報を設定（OIDC）
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        role-session-name: GitHubActions-CDKWorkshop-${{ github.run_id }}
+        aws-region: ap-northeast-1
+        # セキュリティ強化：セッションの有効期限を短く設定
+        role-duration-seconds: 1800
+    
+    - name: AWS認証情報を検証
+      run: |
+        aws sts get-caller-identity
+        echo "AWS認証情報の検証が完了しました"
+    
+    - name: ルートディレクトリの依存関係をインストール
+      run: npm ci
+    
+    - name: Slidevプロジェクトの依存関係をインストール
+      run: |
+        cd contents/slide
+        npm ci
+    
+    - name: Slidevでスライドをビルド
+      run: |
+        cd contents/slide
+        echo "=== Slidevビルドを開始 ==="
+        npm run build
+        echo "=== Slidevビルドが完了しました ==="
+    
+    - name: ビルド成果物を確認
+      run: |
+        echo "=== Slidevビルド成果物の確認 ==="
+        if [ -d "contents/slide/dist" ]; then
+          ls -la contents/slide/dist/
+          echo "ビルド成果物が正常に作成されました"
+        else
+          echo "❌ エラー: ビルド成果物が見つかりません"
+          exit 1
+        fi
+    
+    - name: Websiteプロジェクトの依存関係をインストール
+      run: |
+        cd website
+        npm ci
+    
+    - name: CDKバージョンを確認
+      run: |
+        cd website
+        npx cdk --version
+        echo "CDKバージョンの確認が完了しました"
+    
+    - name: CDKをブートストラップ（初回のみ）
+      run: |
+        cd website
+        echo "=== CDKブートストラップを実行 ==="
+        npx cdk bootstrap --require-approval never
+        echo "=== CDKブートストラップが完了しました ==="
+    
+    - name: CDKテンプレートを生成
+      run: |
+        cd website
+        echo "=== CDKテンプレートを生成 ==="
+        npx cdk synth
+        echo "=== CDKテンプレート生成が完了しました ==="
+    
+    - name: CDKでWebsiteをデプロイ
+      run: |
+        cd website
+        echo "=== CDKデプロイを開始 ==="
+        npx cdk deploy --require-approval never --verbose
+        echo "=== CDKデプロイが完了しました ==="
+    
+    - name: デプロイ結果を出力
+      run: |
+        echo "🎉 デプロイが正常に完了しました！"
+        echo "スライドがWebsiteにデプロイされました"
+        echo "GitHubアクションのログでWebsite URLを確認してください"
+    
+    - name: エラー発生時の通知
+      if: failure()
+      run: |
+        echo "❌ デプロイプロセスでエラーが発生しました"
+        echo "詳細なエラー情報は上記のログを確認してください"
+        echo "よくある問題:"
+        echo "- OIDC認証の設定（IAMロールの信頼ポリシー）"
+        echo "- IAMロールの権限不足"
+        echo "- リソース名の競合"
+        echo "- 依存関係の問題"
+        echo "- OIDCプロバイダーの設定"
+
+env:
+  # CDKの設定
+  CDK_DEFAULT_REGION: ap-northeast-1
+  
+  # Node.jsの設定
+  NODE_OPTIONS: --max_old_space_size=4096
+  
+  # セキュリティ設定
+  AWS_MAX_ATTEMPTS: 3
+  AWS_RETRY_MODE: adaptive 
