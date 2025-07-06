@@ -716,16 +716,17 @@ color: amber
 
 ::content::
 
+新しいディレクトリを作成
+
 ```bash
-# 新しいディレクトリを作成
 mkdir my-hello-api
 cd my-hello-api
+```
 
-# CDKプロジェクトを初期化
-cdk init app --language typescript
+CDKプロジェクトを初期化
 
-# 必要なパッケージをインストール
-npm install
+```bash
+npx cdk init --language typescript
 ```
 
 ---
@@ -735,11 +736,9 @@ color: amber
 
 ::title::
 
-# Lambda関数を作成しよう
+# Lambda関数を作成しよう　１
 
 ::content::
-
-Lambda = サーバーレスでコードを実行
 
 まず、Lambda関数のコードファイルを作成します：
 
@@ -768,6 +767,17 @@ exports.handler = async (event) => {
 };
 ```
 
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# Lambda関数を作成しよう　２
+
+::content::
+
 次に、`lib/my-hello-api-stack.ts`を以下のように変更してLambda関数を定義します：
 
 ```ts {monaco} { editorOptions: { lineNumbers: 'on' } }
@@ -781,6 +791,7 @@ export class HelloApiStack extends cdk.Stack {
 
     // Lambda関数（Hello World処理用）
     const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      functionName: 'HelloFunction',
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/hello'),
@@ -796,11 +807,63 @@ color: amber
 
 ::title::
 
+# デプロイしてみよう
+
+::content::
+
+合成(synth)して、エラーが出ないことを確認します
+
+```bash
+npx cdk synth
+```
+
+デプロイします
+
+```bash {lines:false}
+# デプロイ
+cdk deploy
+# 出力例
+HelloApiStack: deploying... [1/1]
+HelloApiStack: creating CloudFormation changeset...
+
+ ✅  HelloApiStack
+✨  Deployment time: 94.21s
+```
+
+マネジメントコンソールでLambdaコンソールにアクセスし、`HelloFunction`が作成されていることを確認してください。
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
 # API Gatewayを作成しよう
 
 ::content::
 
-```ts {3|16-33}{ maxHeight:'400px'}
+右の内容に修正してください
+
+```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { Construct } from 'constructs';
+
+export class HelloApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // Lambda関数（Hello World処理用）
+    const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      functionName: 'HelloFunction',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/hello'),
+    });
+  }
+}
+~~~
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
@@ -812,6 +875,7 @@ export class HelloApiStack extends cdk.Stack {
 
     // Lambda関数（Hello World処理用）
     const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      functionName: 'HelloFunction',
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/hello'),
@@ -837,6 +901,32 @@ export class HelloApiStack extends cdk.Stack {
   }
 }
 ```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 追加されるリソースを確認してみよう
+
+::content::
+
+`cdk diff`コマンドを使って、追加されるリソースを確認します
+
+```bash {lines:false}
+$ npx cdk diff
+
+HelloApiStack
+Resources
+[+] AWS::ApiGateway::RestApi HelloApi  Hello World API
+[+] AWS::ApiGateway::Resource HelloApihello  /hello
+[+] AWS::ApiGateway::Method HelloApihelloGET  GET /hello
+[+] AWS::Lambda::Function HelloFunction  HelloFunction
+[+] AWS::Lambda::Permission HelloApiInvokeHelloFunction  Allow API Gateway to invoke Lambda function
+```
+
 
 ---
 layout: top-title
