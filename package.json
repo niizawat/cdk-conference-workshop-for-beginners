@@ -1,5 +1,39 @@
 {
+  "name": "cdk-conference-2025-workshop",
+  "version": "1.0.0",
+  "description": "AWS CDKワークショップ用プロジェクト",
+  "private": true,
+  "scripts": {
+    "setup": "./scripts/setup.sh",
+    "setup:oidc": "./scripts/setup-oidc.sh",
+    "setup:oidc:cleanup": "./scripts/setup-oidc.sh --cleanup",
+    "dev:slide": "cd contents/slide && npm run dev",
+    "build:slide": "cd contents/slide && npm run build",
+    "deploy:website": "cd website && npm run build && npx cdk deploy",
+    "deploy:cdk": "cd cdk && npm run build && npx cdk deploy",
+    "test:all": "npm run test:cdk && npm run test:website && npm run test:test",
+    "test:cdk": "cd cdk && npm test",
+    "test:website": "cd website && npm test",
+    "test:test": "cd test && npm test",
+    "clean": "rm -rf node_modules cdk/node_modules contents/slide/node_modules website/node_modules test/node_modules",
+    "clean:dist": "rm -rf contents/slide/dist cdk/cdk.out website/cdk.out test/cdk.out"
+  },
   "dependencies": {
     "slidev-theme-neversink": "^0.3.6"
-  }
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "aws",
+    "cdk",
+    "workshop",
+    "slidev",
+    "typescript"
+  ],
+  "author": "CDK Conference Workshop Team",
+  "license": "MIT"
 }
