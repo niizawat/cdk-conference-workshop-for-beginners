@@ -9,16 +9,16 @@
   },
   "dependencies": {
     "@katzumi/slidev-addon-qrcode": "^0.0.17",
-    "@slidev/cli": "^51.8.2",
+    "@slidev/cli": "^52.0.0",
     "@slidev/theme-default": "^0.25.0",
     "@slidev/theme-seriph": "latest",
-    "aws-cdk": "^2.1018.1",
-    "aws-cdk-lib": "^2.201.0",
+    "aws-cdk": "^2.1020.2",
+    "aws-cdk-lib": "^2.204.0",
     "constructs": "^10.4.2",
-    "vue": "^3.5.16"
+    "vue": "^3.5.17"
   },
   "devDependencies": {
     "cpy-cli": "^5.0.0",
-    "playwright-chromium": "^1.53.0"
+    "playwright-chromium": "^1.53.2"
   }
 }
