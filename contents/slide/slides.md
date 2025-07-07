@@ -90,7 +90,7 @@ color: amber
 
 **本スライドのURL**:
 
-https://bit.ly/cdk-workshop-2025
+https://bit.ly/4nz3B7d
 <br/>
 <br/>
 <div class="flex flex-col items-center">
@@ -147,14 +147,19 @@ color: amber
 - AWS公式サポートの代表的なOSS IaCツール
 - AWSのインフラをTypeScriptなどの開発言語で記述できる
   - TypeScript / JavaScript / Python / Java / C# / Golangに対応
-- 開発言語で記述したコードからCloudFormationテンプレートを生成し、デプロイ
-  - CloudFormationテンプレートの記法を覚えることなく、慣れた言語でインフラを定義
+  - CloudFormationテンプレートの記法を覚えることなく、使い慣れた言語でインフラを定義
+- CDKコードからCloudFormationテンプレートを生成し、デプロイ
+  - デプロイ失敗時のロールバックなどCloudFormationの機能を活用できる
 
 ```mermaid
 graph LR
     CDK[CDKアプリケーション<br/>（各種開発言語）] -- synth --> CF[CloudFormation<br/>テンプレート]
     CF -- deploy --> AWS[AWSリソース]
 ```
+
+<!-- 
+VSCode Serverのデプロイを待っている間にCDKに関する説明をします
+ -->
 
 ---
 layout: top-title-two-cols
@@ -213,6 +218,123 @@ class S3Stack(Stack):
             value=bucket.bucket_name
         )
 ```
+
+---
+layout: top-title-two-cols
+color: amber
+---
+
+::title::
+
+# CDKコードからのCloudFormationテンプレート生成の例
+
+::left::
+
+CDKコード
+
+```ts {monaco} { editorOptions: { lineNumbers: 'on', readOnly: true } }
+const bucket = new s3.Bucket(this, 'MyBucket', {
+  bucketName: 'my-example-bucket-12345',
+  versioned: true,
+  publicReadAccess: false,
+  removalPolicy: cdk.RemovalPolicy.DESTROY,
+  autoDeleteObjects: true,
+});
+```
+
+::right::
+
+CloudFormationテンプレート
+
+```yaml {monaco} { height: '450px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+Resources:
+  MyBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: my-example-bucket-12345
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+    DeletionPolicy: Delete
+
+  # autoDeleteObjects機能を実現するためのカスタムリソース
+  BucketAutoDeleteObjectsCustomResource:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt BucketAutoDeleteObjectsFunction.Arn
+      BucketName: !Ref MyBucket
+
+  # Lambda関数（バケット内オブジェクトの自動削除用）
+  BucketAutoDeleteObjectsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.9
+      Handler: index.handler
+      Role: !GetAtt BucketAutoDeleteObjectsRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import json
+          
+          def handler(event, context):
+              s3 = boto3.client('s3')
+              bucket_name = event['ResourceProperties']['BucketName']
+              
+              try:
+                  if event['RequestType'] == 'Delete':
+                      # バケット内の全オブジェクトを削除
+                      paginator = s3.get_paginator('list_object_versions')
+                      for page in paginator.paginate(Bucket=bucket_name):
+                          delete_keys = []
+                          if 'Versions' in page:
+                              delete_keys.extend([{'Key': obj['Key'], 'VersionId': obj['VersionId']} 
+                                                for obj in page['Versions']])
+                          if 'DeleteMarkers' in page:
+                              delete_keys.extend([{'Key': obj['Key'], 'VersionId': obj['VersionId']} 
+                                                for obj in page['DeleteMarkers']])
+                          
+                          if delete_keys:
+                              s3.delete_objects(Bucket=bucket_name, Delete={'Objects': delete_keys})
+                  
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+
+  # Lambda実行ロール
+  BucketAutoDeleteObjectsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3DeleteObjectsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:ListBucketVersions
+                  - s3:DeleteObject
+                  - s3:DeleteObjectVersion
+                Resource:
+                  - !Sub "${MyBucket}/*"
+                  - !Ref MyBucket
+```
+
 
 ---
 layout: top-title
@@ -317,7 +439,6 @@ npm install
   CDKアプリケーションをデプロイする際に必要なリソースを作成
 ```bash
 npx cdk bootstrap
-# CDKアプリケーションをデプロイする際に必要なリソースを作成
 ```
 
 ---
@@ -334,7 +455,7 @@ color: amber
 4. CDK動作確認 (CDKコードをCloudFormationテンプレートに変換）
 
 ```bash
-cdk synth
+$ npx cdk synth
 # 生成されたCloudFormationテンプレートが表示されればOK
 ```
 
@@ -343,7 +464,7 @@ cdk synth
 5. デプロイ内容の差分の確認（Optional）
 
 ```bash
-cdk diff
+$ npx cdk diff
 # 生成されたCloudFormationテンプレートと現在のスタックの差分を表示
 ```
 
@@ -352,7 +473,9 @@ cdk diff
 5. AWSへデプロイ
 
 ```bash
-cdk deploy
+
+$ npx cdk deploy
+✨  Synthesis time: 6.69s
 ........
 Do you wish to deploy these changes (y/n)?  <-- yを入力
 ```
@@ -405,6 +528,13 @@ align: l-lt-lt
 2. **翻訳APIのテスト**
    - ブラウザ上で翻訳機能を試す
 
+3. **マネージドコンソールで確認**
+   - 以下がデプロイされていることを確認
+     - CloudFormationスタック
+     - API Gateway
+     - Lambda関数
+     - S3バケット
+
 ::right::
 
 ![画像](./images/demo.png)
@@ -420,14 +550,15 @@ color: amber
 
 ::title::
 
-# CDKアプリケーションの基本的なディレクトリ構造
+# CDKアプリケーションの基本的なディレクトリ構造(TypeScriptの場合)
 
 ::content::
 
 ```sh {lines:false}
 ├── bin/
 │   └── cdk.ts          # CDKアプリのエントリーポイント
-├── lib/
+├── cdk.out/            # synthコマンドで生成されるファイル(CloudFormationテンプレート, Lambda関数コードなどのアセット)
+├── lib/                # CDKコンストラクト定義ファイル格納ディレクトリ
 │   └── app-stack.ts    # スタック定義（メインのインフラコード）
 ├── test/               # テストファイル格納ディレクトリ
 ├── cdk.json           # CDKプロジェクトの設定ファイル
@@ -446,7 +577,7 @@ color: amber
 
 ::content::
 
-`bin/cdk.ts` はCDKアプリケーションのメインエントリーポイントです
+**bin/cdk.ts** : CDKアプリケーションのエントリーポイント(ファイル名は任意)
 
 ```ts
 #!/usr/bin/env node
@@ -465,7 +596,7 @@ new AppStack(app, 'AppStack', {
 - `import * as cdk` - AWS CDKのコアライブラリを読み込み
 - `import { AppStack }` - 自作のスタック定義を読み込み
 - `new cdk.App()` - CDKアプリケーションのインスタンスを作成
-- `new AppStack()` - スタックをアプリに追加
+- `new AppStack(app, '<論理ID>')` - スタックインスタンスをアプリに追加
 
 ---
 layout: top-title
@@ -684,6 +815,9 @@ export class AppStack extends cdk.Stack {
 }
 ```
 
+<!-- 
+コンストラクトについて説明する
+ -->
 ---
 layout: top-title
 color: amber
@@ -719,6 +853,7 @@ color: amber
 新しいディレクトリを作成
 
 ```bash
+cd ~/environment
 mkdir my-hello-api
 cd my-hello-api
 ```
@@ -785,7 +920,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
-export class HelloApiStack extends cdk.Stack {
+export class MyHelloApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -811,25 +946,30 @@ color: amber
 
 ::content::
 
-合成(synth)して、エラーが出ないことを確認します
+合成(synth)して、CloudFormationテンプレートの生成でエラーが出ないことを確認します
 
 ```bash
-npx cdk synth
+$ npx cdk synth
 ```
 
 デプロイします
 
 ```bash {lines:false}
 # デプロイ
-cdk deploy
-# 出力例
-HelloApiStack: deploying... [1/1]
-HelloApiStack: creating CloudFormation changeset...
+$ npx cdk deploy
 
- ✅  HelloApiStack
+✨  Synthesis time: 6.86s
+.....
+Do you wish to deploy these changes (y/n)? y <-- yを入力
+MyHelloApiStack: deploying... [1/1]
+MyHelloApiStack: creating CloudFormation changeset...
+
+ ✅  MyHelloApiStack
 ✨  Deployment time: 94.21s
+Stack ARN:
+arn:aws:cloudformation:ap-northeast-1:1234567898012:stack/MyHelloApiStack/9086c390-5aca-11f0-9c58-06e431bf345f
+✨  Total time: 58.78s```
 ```
-
 マネジメントコンソールでLambdaコンソールにアクセスし、`HelloFunction`が作成されていることを確認してください。
 
 ---
@@ -850,7 +990,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
-export class HelloApiStack extends cdk.Stack {
+export class MyHelloApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -869,7 +1009,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { Construct } from 'constructs';
 
-export class HelloApiStack extends cdk.Stack {
+export class MyHelloApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -917,14 +1057,20 @@ color: amber
 
 ```bash {lines:false}
 $ npx cdk diff
-
-HelloApiStack
+.......
 Resources
-[+] AWS::ApiGateway::RestApi HelloApi  Hello World API
-[+] AWS::ApiGateway::Resource HelloApihello  /hello
-[+] AWS::ApiGateway::Method HelloApihelloGET  GET /hello
-[+] AWS::Lambda::Function HelloFunction  HelloFunction
-[+] AWS::Lambda::Permission HelloApiInvokeHelloFunction  Allow API Gateway to invoke Lambda function
+[+] AWS::ApiGateway::RestApi HelloApi HelloApi3F989F66
+[+] AWS::ApiGateway::Deployment HelloApi/Deployment HelloApiDeployment9558280802b9217f293d8c58cf6068659f4fb193
+[+] AWS::ApiGateway::Stage HelloApi/DeploymentStage.prod HelloApiDeploymentStageprodE85054A7
+[+] AWS::ApiGateway::Resource HelloApi/Default/hello HelloApihello0292B1E3
+[+] AWS::Lambda::Permission HelloApi/Default/hello/GET/ApiPermission.MyHelloApiStackHelloApi335DAE28.GET..hello HelloApihelloGETApiPermissionMyHelloApiStackHelloApi335DAE28GEThelloDB885900
+[+] AWS::Lambda::Permission HelloApi/Default/hello/GET/ApiPermission.Test.MyHelloApiStackHelloApi335DAE28.GET..hello HelloApihelloGETApiPermissionTestMyHelloApiStackHelloApi335DAE28GEThello836F3F4A
+[+] AWS::ApiGateway::Method HelloApi/Default/hello/GET HelloApihelloGET34B3ECE0
+
+Outputs
+[+] Output HelloApi/Endpoint HelloApiEndpoint91438085: {"Value":{"Fn::Join":["",["https://",{"Ref":"HelloApi3F989F66"},".execute-api.",{"Ref":"AWS::Region"},".",{"Ref":"AWS::URLSuffix"},"/",{"Ref":"HelloApiDeploymentStageprodE85054A7"},"/"]]}}
+[+] Output ApiUrl ApiUrl: {"Description":"API Gateway URL","Value":{"Fn::Join":["",["https://",{"Ref":"HelloApi3F989F66"},".execute-api.",{"Ref":"AWS::Region"},".",{"Ref":"AWS::URLSuffix"},"/",{"Ref":"HelloApiDeploymentStageprodE85054A7"},"/"]]}}
+.......
 ```
 
 
@@ -941,16 +1087,13 @@ color: amber
 
 ```bash {lines:false}
 # デプロイ
-cdk deploy
+$ npx cdk deploy
 
 # API Gateway URLにアクセス
 curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
 
 # レスポンス例
-{
-  "message": "Hello, World!",
-  "timestamp": "2024-01-15T10:30:00.000Z"
-}
+{"message":"Hello, World!","timestamp":"2025-07-07T00:47:45.296Z"}
 ```
 
 ---
