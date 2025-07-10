@@ -28,11 +28,26 @@ align: l-lt-lt
 
 ::left::
 
-自己紹介
+- 新澤　忠士 / @tniizawa
+
+- クラスメソッド株式会社
+
+  製造ビジネステクノロジー部
+  
+  コネクティッドカーチーム
+
+- JAWS-UG CDK支部 運営
+
+- 好きなAWSサービス
+  - CDK, IoT FleetWise, IoT Core
 
 ::right::
 
-画像
+<div class="flex justify-center">
+  <figure>
+    <img src="./images/self.png" width="300" height="300" />
+  </figure>
+</div>
 
 ---
 layout: top-title
