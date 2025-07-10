@@ -84,7 +84,8 @@ color: amber
 3. サンプルコードでCDKを動かす
 4. コードの中身を理解
 5. 自分でWebアプリのインフラを構築
-6. まとめ・質疑応答
+6. 発展課題（余裕があれば）
+7. まとめ・質疑応答
 
 ::right::
 
@@ -246,7 +247,7 @@ const bucket = new s3.Bucket(this, 'MyBucket', {
 
 CloudFormationテンプレート
 
-```yaml {monaco} { height: '450px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+```yaml {monaco} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 Resources:
   MyBucket:
     Type: AWS::S3::Bucket
@@ -926,7 +927,6 @@ export class MyHelloApiStack extends cdk.Stack {
 
     // Lambda関数（Hello World処理用）
     const helloFunction = new lambda.Function(this, 'HelloFunction', {
-      functionName: 'HelloFunction',
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/hello'),
@@ -996,7 +996,6 @@ export class MyHelloApiStack extends cdk.Stack {
 
     // Lambda関数（Hello World処理用）
     const helloFunction = new lambda.Function(this, 'HelloFunction', {
-      functionName: 'HelloFunction',
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/hello'),
@@ -1015,7 +1014,6 @@ export class MyHelloApiStack extends cdk.Stack {
 
     // Lambda関数（Hello World処理用）
     const helloFunction = new lambda.Function(this, 'HelloFunction', {
-      functionName: 'HelloFunction',
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/hello'),
@@ -1023,7 +1021,7 @@ export class MyHelloApiStack extends cdk.Stack {
     // API Gateway（REST API）
     const api = new apigateway.RestApi(this, 'HelloApi', {
       restApiName: 'Hello World API',
-      description: 'シンプルなHello World API',
+      description: 'Hello World API',
     });
 
     // Lambda統合
@@ -1054,6 +1052,8 @@ color: amber
 ::content::
 
 `cdk diff`コマンドを使って、追加されるリソースを確認します
+- `[+]`：追加されるリソース
+- `[-]`：削除されるリソース
 
 ```bash {lines:false}
 $ npx cdk diff
@@ -1113,6 +1113,7 @@ CDKを使ってシンプルなAPIを作成できました！
 - Lambda関数の作成
 - API Gatewayの作成
 - CDKでのデプロイ
+- 差分の確認
 
 ---
 layout: top-title
@@ -1127,12 +1128,27 @@ color: amber
 
 以下の課題にチャレンジしてみましょう：
 
-**レベル3：外部サービス連携**
-- Amazon Translateを使った翻訳API
-- DynamoDBを使ったデータ保存API
-- S3を使ったファイルアップロードAPI
+- スタックを追加してみる
+  - 最初のスタックとは違うリージョンに作成
+- スタック間でリソースを参照する
+- 本番環境と開発環境を分離する
 
-API Documentのリンク
+
+---
+layout: top-title
+color: amber
+---
+::title::
+
+# 🔧 新しいスタックを作成してみよう
+
+::content::
+
+**手順：**
+
+1. 新しいスタッククラスを作成
+2. `app.ts`でスタックをインスタンス化
+3. デプロイして確認
 
 ---
 layout: top-title
@@ -1141,46 +1157,1011 @@ color: amber
 
 ::title::
 
-# 発展課題：Amazon Translate API
+# ステップ1: 新しいスタッククラスを作成
 
 ::content::
 
-```ts {monaco} { editorOptions: { lineNumbers: 'on' } }
-// Lambda関数にTranslateとComprehendの権限を付与
-translateFunction.addToRolePolicy(new iam.PolicyStatement({
-  effect: iam.Effect.ALLOW,
-  actions: [
-    'translate:TranslateText',
-    'comprehend:DetectDominantLanguage'
-  ],
-  resources: ['*']
-}));
+`lib/database-stack.ts`を作成：
 
-// /translateエンドポイントの作成
-const translateResource = api.root.addResource('translate');
-translateResource.addMethod('POST', new apigateway.LambdaIntegration(translateFunction));
+```ts {monaco} { editorOptions: { lineNumbers: 'on' }, height: '400px' }
+import * as cdk from 'aws-cdk-lib';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import { Construct } from 'constructs';
+
+export class DatabaseStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // DynamoDBテーブルを作成
+    const table = new dynamodb.Table(this, 'UserTable', {
+      tableName: 'users',
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    // 出力値の設定
+    new cdk.CfnOutput(this, 'TableName', {
+      value: table.tableName,
+      description: 'DynamoDB Table Name'
+    });
+  }
+}
 ```
 
-**Lambda関数の例：**
-```js
-const { TranslateClient, TranslateTextCommand } = require('@aws-sdk/client-translate');
+---
+layout: top-title
+color: amber
+---
 
+::title::
+
+# ステップ2: スタックをインスタンス化
+
+::content::
+
+`bin/my-hello-api.ts`を編集して、新しいスタックを追加：
+
+```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+import * as cdk from 'aws-cdk-lib';
+import { MyHelloApiStack } from '../lib/my-hello-api-stack';
+
+const app = new cdk.App();
+new MyHelloApiStack(app, 'MyHelloApiStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+});
+~~~
+import * as cdk from 'aws-cdk-lib';
+import { MyHelloApiStack } from '../lib/my-hello-api-stack';
+import { DatabaseStack } from '../lib/database-stack';
+
+const app = new cdk.App();
+new MyHelloApiStack(app, 'MyHelloApiStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+});
+
+new DatabaseStack(app, 'DatabaseStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
+});
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ3: デプロイして確認
+
+::content::
+
+**スタックのリストを出力して確認：**
+
+```bash
+# すべてのスタックを表示
+$ npx cdk list
+MyHelloApiStack
+DatabaseStack
+```
+
+**個別にデプロイ：**
+
+```bash
+# 特定のスタックのみデプロイ
+$ npx cdk deploy DatabaseStack
+
+# 全てのスタックをデプロイ
+$ npx cdk deploy --all
+```
+
+**マネジメントコンソールで確認：**
+
+- 東京リージョン（ap-northeast-1）: API Gateway、Lambda
+- バージニア北部リージョン（us-east-1）: DynamoDB
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 🔗 スタック間でリソースを参照してみよう
+
+::content::
+
+スタック間でリソースを参照する方法を学びましょう！
+
+**目標：**
+
+- S3バケット用のスタックを作成
+- API StackからS3バケットを参照
+- スタック間の依存関係を理解
+
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 実装例：スタック間参照のアーキテクチャ
+
+::content::
+
+<br/>
+
+<div class="flex justify-center">
+
+```mermaid {scale: 0.6}
+graph LR
+    subgraph "ap-northeast-1"
+        direction TB
+        
+        subgraph "S3Stack"
+            direction TB
+            S3["S3 Bucket"]
+            S3 --> BucketRef["Bucket Reference<br/>(Constructor)"]
+        end
+        
+        subgraph "ApiStack"
+            direction TB
+            BucketParam["Bucket Parameter<br/>(Constructor)"] --> Lambda["Lambda Function"]
+            Lambda --> API["API Gateway"]
+        end
+        
+        BucketRef -.-> BucketParam
+        Lambda -.-> S3
+    end
+    
+    style S3 fill:#e8f5e8
+    style BucketRef fill:#fff3e0
+    style BucketParam fill:#fff3e0
+    style Lambda fill:#e1f5fe
+    style API fill:#e1f5fe
+```
+
+</div>
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ1: S3Stackの作成
+
+::content::
+
+`lib/s3-stack.ts`を新規作成して、S3バケットを定義：
+
+```ts {monaco} { height: '400px', editorOptions: { lineNumbers: 'on' } }
+import * as cdk from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
+
+export class S3Stack extends cdk.Stack {
+  // S3バケットを他のスタックから参照できるようにパブリックプロパティとして公開
+  public readonly bucket: s3.Bucket;
+
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // S3バケットを作成
+    this.bucket = new s3.Bucket(this, 'SharedBucket', {
+      bucketName: `shared-files-${this.account}-${this.region}`,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    // 出力値の設定
+    new cdk.CfnOutput(this, 'BucketName', {
+      value: this.bucket.bucketName,
+      description: 'S3 Bucket Name'
+    });
+  }
+}
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ2: API Stackの修正
+
+::content::
+
+`lib/my-hello-api-stack.ts`を修正して、S3バケットインスタンスを受け取る：
+
+```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import { Construct } from 'constructs';
+
+export class MyHelloApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // Lambda関数（Hello World処理用）
+    const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/hello'),
+    });
+    // API Gateway（REST API）
+    const api = new apigateway.RestApi(this, 'HelloApi', {
+      restApiName: 'Hello World API',
+      description: 'Hello World API',
+    });
+
+    // Lambda統合
+    const helloIntegration = new apigateway.LambdaIntegration(helloFunction);
+
+    // /helloエンドポイントの作成
+    const helloResource = api.root.addResource('hello');
+    helloResource.addMethod('GET', helloIntegration);
+
+    // 出力値の設定
+    new cdk.CfnOutput(this, 'ApiUrl', {
+      value: api.url,
+      description: 'API Gateway URL'
+    });
+  }
+}
+~~~
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
+
+// API Stackの設定オプション
+interface ApiStackProps extends cdk.StackProps {
+  bucket: s3.Bucket;  // S3バケットをパラメータとして受け取る
+}
+
+export class MyHelloApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: ApiStackProps) {
+    super(scope, id, props);
+
+    // Lambda関数（Hello World処理用）
+    const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/hello'),
+      environment: {
+        BUCKET_NAME: props.bucket.bucketName,  // 環境変数としてバケット名を設定
+      },
+    });
+
+    // Lambda関数にS3の読み書き権限を付与（CDKが自動的に適切な権限を設定）
+    props.bucket.grantReadWrite(helloFunction);
+
+    // API Gateway（REST API）
+    const api = new apigateway.RestApi(this, 'HelloApi', {
+      restApiName: 'Hello World API',
+      description: 'Hello World API',
+    });
+
+    // Lambda統合
+    const helloIntegration = new apigateway.LambdaIntegration(helloFunction);
+
+    // /helloエンドポイントの作成
+    const helloResource = api.root.addResource('hello');
+    helloResource.addMethod('GET', helloIntegration);
+
+    // 出力値の設定
+    new cdk.CfnOutput(this, 'ApiUrl', {
+      value: api.url,
+      description: 'API Gateway URL'
+    });
+  }
+}
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ3: Lambda関数の修正
+
+::content::
+
+`lambda/hello/index.js`を修正して、S3を操作：
+
+```js {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 exports.handler = async (event) => {
-  const { text, targetLang = 'ja' } = JSON.parse(event.body);
-  
-  const translateClient = new TranslateClient({ region: process.env.AWS_REGION });
-  const result = await translateClient.send(new TranslateTextCommand({
-    Text: text,
-    SourceLanguageCode: 'auto',
-    TargetLanguageCode: targetLang
-  }));
-  
   return {
     statusCode: 200,
-    body: JSON.stringify({ translatedText: result.TranslatedText })
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: 'Hello, World!',
+      timestamp: new Date().toISOString()
+    })
   };
 };
+~~~
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+
+const s3 = new S3Client({});
+const bucketName = process.env.BUCKET_NAME;
+
+exports.handler = async (event) => {
+  const requestId = Math.random().toString(36).substring(2, 15);
+  const fileName = `hello-${requestId}.json`;
+  
+  try {
+    // ファイルの内容を作成
+    const fileContent = {
+      id: requestId,
+      message: 'Hello from Lambda!',
+      timestamp: new Date().toISOString(),
+      requestData: event
+    };
+
+    // S3にファイルを保存
+    await s3.send(new PutObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+      Body: JSON.stringify(fileContent),
+      ContentType: 'application/json'
+    }));
+
+    // S3からファイルを読み取り
+    const response = await s3.send(new GetObjectCommand({
+      Bucket: bucketName,
+      Key: fileName
+    }));
+
+    const savedData = JSON.parse(await response.Body.transformToString());
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: 'Hello, World!',
+        timestamp: new Date().toISOString(),
+        requestId: requestId,
+        savedData: savedData,
+        bucketName: bucketName,
+        fileName: fileName
+      })
+    };
+  } catch (error) {
+    console.error('Error:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        error: 'Internal Server Error',
+        message: error.message
+      })
+    };
+  }
+};
 ```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ4: bin/my-hello-api.tsの修正
+
+::content::
+
+`bin/my-hello-api.ts`を修正して、S3StackからApiStackにS3バケットを渡す：
+
+```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+import * as cdk from 'aws-cdk-lib';
+import { MyHelloApiStack } from '../lib/my-hello-api-stack';
+import { DatabaseStack } from '../lib/database-stack';
+
+const app = new cdk.App();
+
+new MyHelloApiStack(app, 'MyHelloApiStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+});
+
+new DatabaseStack(app, 'DatabaseStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
+});
+~~~
+import * as cdk from 'aws-cdk-lib';
+import { MyHelloApiStack } from '../lib/my-hello-api-stack';
+import { DatabaseStack } from '../lib/database-stack';
+import { S3Stack } from '../lib/s3-stack';
+
+const app = new cdk.App();
+
+// 1. S3Stackを作成
+const s3Stack = new S3Stack(app, 'S3Stack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+});
+
+// 2. S3StackのS3バケットをApiStackに渡す
+new MyHelloApiStack(app, 'MyHelloApiStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+  bucket: s3Stack.bucket,  // S3バケットインスタンスを渡す
+});
+
+new DatabaseStack(app, 'DatabaseStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
+});
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ5: デプロイと確認
+
+::content::
+
+**デプロイ順序（CDKが自動的に依存関係を解決）：**
+
+```bash
+# CDKが依存関係を自動的に解決してデプロイ
+npx cdk deploy --all
+```
+
+**動作確認：**
+
+```bash
+# API Gateway URLにアクセス
+curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
+
+# レスポンス例
+{
+  "message": "Hello, World!",
+  "timestamp": "2025-01-07T00:47:45.296Z",
+  "requestId": "abc123def456",
+  "savedData": {
+    "id": "abc123def456",
+    "message": "Hello from Lambda!",
+    "timestamp": "2025-01-07T00:47:45.296Z"
+  },
+  "bucketName": "shared-files-123456789012-ap-northeast-1",
+  "fileName": "hello-abc123def456.json"
+}
+```
+
+**マネジメントコンソールで確認：**
+- S3バケットにファイルが保存されていることを確認
+
+---
+layout: top-title-two-cols
+color: amber
+---
+
+::title::
+
+# ⚠️ 循環参照に注意！
+
+::left::
+
+## 循環参照とは
+
+```mermaid {scale: 0.8}
+graph LR
+    A["Stack A"] --> B["Stack B"]
+    B --> A
+    
+    style A fill:#ffcdd2
+    style B fill:#ffcdd2
+```
+
+**問題：**
+- スタックAがスタックBを参照
+- スタックBがスタックAを参照
+
+**デプロイ時にエラーが発生!!**
+
+::right::
+
+## 解決方法
+
+```mermaid {scale: 0.8}
+graph LR
+    A["Stack A"] --> B["Stack B"]
+    C["Stack C"] --> B
+    
+    style A fill:#c8e6c9
+    style B fill:#c8e6c9
+    style C fill:#e1f5fe
+```
+
+**解決策：**
+
+- スタックを分割する必要性が低ければスタックをまとめる
+- 依存関係を一方向にする
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 🌱 環境別設定を実装してみよう
+
+::content::
+
+実際の開発では、開発環境と本番環境を分けて管理する必要があります。
+
+**手順：**
+
+1. 環境設定ファイルを作成
+2. S3Stackを環境対応に修正
+3. MyHelloApiStackを環境対応に修正
+4. 環境別デプロイを設定
+5. 環境別にデプロイして確認
+
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 環境分離の２つの戦略
+
+::content::
+
+## 1. アカウント分離
+
+<div class="flex justify-center">
+
+```mermaid {scale: 0.8}
+graph LR
+    subgraph Dev ["開発用アカウント"]
+        direction TB
+        DevAPI["API Gateway"] --> DevLambda["Lambda"]
+        DevLambda --> DevS3["S3"]
+    end
+    
+    subgraph Prod ["本番用アカウント"]
+        direction TB
+        ProdAPI["API Gateway"] --> ProdLambda["Lambda"]
+        ProdLambda --> ProdS3["S3"]
+    end
+    
+    Dev ~~~ Prod
+    
+    style DevLambda fill:#e1f5fe
+    style DevS3 fill:#e1f5fe
+    style DevAPI fill:#e1f5fe
+    
+    style ProdLambda fill:#fff3e0
+    style ProdS3 fill:#fff3e0
+    style ProdAPI fill:#fff3e0
+```
+
+</div>
+
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# 環境分離の２つの戦略
+
+::content::
+
+## 2. アカウント内分離（今回はこちらを実装）
+
+<div class="flex justify-center">
+
+```mermaid {scale: 0.9}
+graph LR
+    subgraph Account ["同一AWSアカウント"]
+        direction LR
+        
+        subgraph Dev ["開発環境"]
+            direction LR
+            DevAPI["API Gateway<br/>HelloApi-dev"] --> DevLambda["Lambda<br/>HelloFunction-dev"]
+            DevLambda --> DevS3["S3<br/>shared-files-dev"]
+        end
+        
+        subgraph Prod ["本番環境"]
+            direction LR
+            ProdAPI["API Gateway<br/>HelloApi-prod"] --> ProdLambda["Lambda<br/>HelloFunction-prod"]
+            ProdLambda --> ProdS3["S3<br/>shared-files-prod"]
+        end
+    end
+    
+    style DevLambda fill:#e1f5fe
+    style DevS3 fill:#e1f5fe
+    style DevAPI fill:#e1f5fe
+    
+    style ProdLambda fill:#fff3e0
+    style ProdS3 fill:#fff3e0
+    style ProdAPI fill:#fff3e0
+```
+
+</div>
+
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ1: 環境設定ファイルを作成
+
+::content::
+
+`config/environments.ts`を作成：
+
+```ts {monaco} { editorOptions: { lineNumbers: 'on' }, height: '350px' }
+export interface EnvironmentConfig {
+  envName: string;
+  region: string;
+  apiName: string;
+  lambdaTimeout: number;
+  bucketName: string;
+  removalPolicy: 'DESTROY' | 'RETAIN';
+}
+
+export const environments: { [key: string]: EnvironmentConfig } = {
+  dev: {
+    envName: 'dev',
+    region: 'ap-northeast-1',
+    apiName: 'HelloApi-dev',
+    lambdaTimeout: 30,
+    bucketName: 'shared-files-dev',
+    removalPolicy: 'DESTROY',
+  },
+  prod: {
+    envName: 'prod',
+    region: 'ap-northeast-1',
+    apiName: 'HelloApi-prod',
+    lambdaTimeout: 10,
+    bucketName: 'shared-files-prod',
+    removalPolicy: 'RETAIN',
+  },
+};
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ2: S3Stackを環境対応に修正
+
+::content::
+
+既存の`S3Stack`を環境対応版に修正します：
+
+`lib/s3-stack.ts`を以下に変更：
+
+```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+import * as cdk from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
+
+export class S3Stack extends cdk.Stack {
+  public readonly bucket: s3.Bucket;
+
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    this.bucket = new s3.Bucket(this, 'SharedBucket', {
+      bucketName: `shared-files-${this.account}-${this.region}`,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    new cdk.CfnOutput(this, 'BucketName', {
+      value: this.bucket.bucketName,
+      description: 'S3 Bucket Name'
+    });
+  }
+}
+~~~
+import * as cdk from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
+import { EnvironmentConfig } from '../config/environments';
+
+export class S3Stack extends cdk.Stack {
+  public readonly bucket: s3.Bucket;
+
+  constructor(scope: Construct, id: string, config: EnvironmentConfig, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    // 環境別S3バケット
+    this.bucket = new s3.Bucket(this, 'SharedBucket', {
+      bucketName: `${config.bucketName}-${this.account}-${this.region}`,
+      removalPolicy: config.removalPolicy === 'DESTROY' ? cdk.RemovalPolicy.DESTROY : cdk.RemovalPolicy.RETAIN,
+      autoDeleteObjects: config.removalPolicy === 'DESTROY',
+    });
+
+    new cdk.CfnOutput(this, 'BucketName', {
+      value: this.bucket.bucketName,
+      description: `S3 Bucket Name (${config.envName})`
+    });
+  }
+}
+```
+
+**変更点の説明：**
+- `EnvironmentConfig`のimportを追加
+- コンストラクタの第3引数に`config`を追加
+- バケット名に環境名を含む
+- 削除ポリシーを環境設定に応じて変更
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ3: MyHelloApiStackを環境対応に修正
+
+::content::
+
+既存の`MyHelloApiStack`を環境対応版に修正します：
+
+`lib/my-hello-api-stack.ts`を以下に変更：
+
+```ts {monaco-diff} { height: '350px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
+
+interface ApiStackProps extends cdk.StackProps {
+  bucket: s3.Bucket;
+}
+
+export class MyHelloApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: ApiStackProps) {
+    super(scope, id, props);
+
+    const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/hello'),
+      environment: {
+        BUCKET_NAME: props.bucket.bucketName,
+      },
+    });
+
+    props.bucket.grantReadWrite(helloFunction);
+
+    const api = new apigateway.RestApi(this, 'HelloApi', {
+      restApiName: 'Hello World API',
+      description: 'Hello World API',
+    });
+
+    const helloIntegration = new apigateway.LambdaIntegration(helloFunction);
+    const helloResource = api.root.addResource('hello');
+    helloResource.addMethod('GET', helloIntegration);
+
+    new cdk.CfnOutput(this, 'ApiUrl', {
+      value: api.url,
+      description: 'API Gateway URL'
+    });
+  }
+}
+~~~
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
+import { EnvironmentConfig } from '../config/environments';
+
+interface ApiStackProps extends cdk.StackProps {
+  bucket: s3.Bucket;
+  config: EnvironmentConfig;
+}
+
+export class MyHelloApiStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: ApiStackProps) {
+    super(scope, id, props);
+
+    const helloFunction = new lambda.Function(this, 'HelloFunction', {
+      functionName: `HelloFunction-${props.config.envName}`,
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/hello'),
+      environment: {
+        BUCKET_NAME: props.bucket.bucketName,
+      },
+    });
+
+    props.bucket.grantReadWrite(helloFunction);
+
+    const api = new apigateway.RestApi(this, 'HelloApi', {
+      restApiName: props.config.apiName,
+      description: `Hello World API - ${props.config.envName}`,
+    });
+
+    const helloIntegration = new apigateway.LambdaIntegration(helloFunction);
+    const helloResource = api.root.addResource('hello');
+    helloResource.addMethod('GET', helloIntegration);
+
+    new cdk.CfnOutput(this, 'ApiUrl', {
+      value: api.url,
+      description: `API Gateway URL (${props.config.envName})`
+    });
+  }
+}
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ4: 環境別デプロイを設定
+
+::content::
+
+`bin/my-hello-api.ts`を環境別デプロイに対応：
+
+```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+import * as cdk from 'aws-cdk-lib';
+import { MyHelloApiStack } from '../lib/my-hello-api-stack';
+import { DatabaseStack } from '../lib/database-stack';
+import { S3Stack } from '../lib/s3-stack';
+
+const app = new cdk.App();
+
+// 1. まずS3Stackを作成（同じリージョン）
+const s3Stack = new S3Stack(app, 'S3Stack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+});
+
+// 2. S3StackのS3バケットをApiStackに渡す
+new MyHelloApiStack(app, 'MyHelloApiStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+  bucket: s3Stack.bucket,  // S3バケットインスタンスを渡す
+});
+
+new DatabaseStack(app, 'DatabaseStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
+});
+~~~
+import * as cdk from 'aws-cdk-lib';
+import { MyHelloApiStack } from '../lib/my-hello-api-stack';
+import { DatabaseStack } from '../lib/database-stack';
+import { S3Stack } from '../lib/s3-stack';
+import { environments } from '../config/environments';
+
+const app = new cdk.App();
+
+// 環境設定から各環境のスタックを作成
+Object.entries(environments).forEach(([envName, config]) => {
+  // 1. 環境別S3Stack（既存のS3Stackを使用）
+  const s3Stack = new S3Stack(app, `S3Stack-${envName}`, config, {
+    env: { 
+      account: process.env.CDK_DEFAULT_ACCOUNT, 
+      region: config.region 
+    },
+    tags: {
+      Environment: envName,
+      Project: 'HelloApi',
+    },
+  });
+
+  // 2. 環境別ApiStack（既存のMyHelloApiStackを使用）
+  new MyHelloApiStack(app, `ApiStack-${envName}`, {
+    env: { 
+      account: process.env.CDK_DEFAULT_ACCOUNT, 
+      region: config.region 
+    },
+    bucket: s3Stack.bucket,
+    config: config,
+    tags: {
+      Environment: envName,
+      Project: 'HelloApi',
+    },
+  });
+});
+
+new DatabaseStack(app, 'DatabaseStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
+});
+```
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# ステップ5: 環境別デプロイを実行
+
+::content::
+
+**スタックを確認：**
+
+```bash
+# すべてのスタックを表示
+$ npx cdk list
+ApiStack-dev
+ApiStack-prod
+DatabaseStack
+S3Stack-dev
+S3Stack-prod
+```
+
+**環境別デプロイ：**
+
+```bash
+# 開発環境のみデプロイ
+$ npx cdk deploy S3Stack-dev ApiStack-dev
+
+# 本番環境のみデプロイ
+$ npx cdk deploy S3Stack-prod ApiStack-prod
+
+# 環境別スタックを全てデプロイ
+$ npx cdk deploy S3Stack-dev ApiStack-dev S3Stack-prod ApiStack-prod
+
+# 全スタックをデプロイ
+$ npx cdk deploy --all
+```
+
+**動作確認：**
+
+```bash
+# 開発環境のAPIにアクセス
+curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
+
+# レスポンス例（開発環境）
+{
+  "message": "Hello, World!",
+  "timestamp": "2025-01-07T00:47:45.296Z",
+  "requestId": "abc123def456",
+  "savedData": {...},
+  "bucketName": "shared-files-dev-123456789012-ap-northeast-1",
+  "fileName": "hello-abc123def456.json"
+}
+```
+
+**マネジメントコンソールで確認：**
+
+- 開発環境：`shared-files-dev-123456789012-ap-northeast-1` S3バケット
+- 本番環境：`shared-files-prod-123456789012-ap-northeast-1` S3バケット
+- 各環境のLambda関数とAPI Gateway
 
 ---
 layout: top-title
@@ -1197,7 +2178,7 @@ color: amber
 
 ```bash {lines:false}
 # リソースを削除
-cdk destroy
+cdk destroy --all
 ```
 
 <br/>
@@ -1276,23 +2257,9 @@ addons:
 
 ::title::
 
-# ありがとうございました
+# ご参加ありがとうございました！
 
 ::content::
 
 お疲れさまでした！
 皆さんの今後のAWS CDK活用を応援しています 🎉
-
-**アンケートのご協力をお願いします**
-
-<br/>
-<br/>
-
-<div class="flex flex-col items-center">
-  <QRCode
-      :width="720"
-      :height="720"
-      value="https://sli.dev"
-      image="./images/CDK_logo.png"
-  />
-</div>
