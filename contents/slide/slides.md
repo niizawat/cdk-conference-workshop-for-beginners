@@ -117,10 +117,14 @@ https://bit.ly/4nz3B7d
       image="./images/CDK_logo.png"
   />
 </div>
+<br/>
+<br/>
+
+- スライド表示が乱れる場合はブラウザのリロードすると大抵直ります🙇‍♀️
 
 <!-- 
 本日ワークショップの作業を行うVSCode Serverを構築してもらいます。<br/>
-このデプロイに時間がかかるので、これを待っている間にCDKについての簡単な説明をさせていただこうと思います。
+このデプロイに時間がかかるので、これを待っている間にCDKについての基礎的な説明をさせていただこうと思います。
  -->
 ---
 layout: top-title
@@ -148,6 +152,9 @@ color: amber
 
 ※ デプロイには約8分程度かかります。
 
+**詳細手順：**
+
+- [DevelopersIO | AWS WorkshopのVisual Studio Code Serverテンプレートをデプロイしてみた](https://dev.classmethod.jp/articles/aws-vscode-server-workshop-setup-review/)
 
 ---
 layout: top-title
@@ -161,8 +168,9 @@ color: amber
 ::content::
 
 - AWS公式サポートの代表的なOSS IaCツール
-- AWSのインフラをTypeScriptなどの開発言語で記述できる
+- AWSのインフラをTypeScriptなどのプログラミング言語で記述できる
   - TypeScript / JavaScript / Python / Java / C# / Golangに対応
+  - IDEを使うことでコード補完が利用できる
   - CloudFormationテンプレートの記法を覚えることなく、使い慣れた言語でインフラを定義
 - CDKコードからCloudFormationテンプレートを生成し、デプロイ
   - デプロイ失敗時のロールバックなどCloudFormationの機能を活用できる
@@ -351,6 +359,45 @@ Resources:
                   - !Ref MyBucket
 ```
 
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# CDK CLIの基本コマンド
+
+::content::
+
+CDKを使うために覚えておきたい基本的なコマンドを紹介します
+
+<style>
+.slidev-layout table {
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+.slidev-layout td, .slidev-layout th {
+  padding: 0.4rem 0.6rem;
+}
+</style>
+
+| コマンド | 説明 | 使用例 |
+|----------|------|--------|
+| **`cdk init`** | 新しいCDKプロジェクトを初期化 | `cdk init --language typescript` |
+| **`cdk synth`** | CDKコードをCloudFormationテンプレートに変換 | `cdk synth` |
+| **`cdk diff`** | 現在のスタックとの差分を表示 | `cdk diff` |
+| **`cdk deploy`** | スタックをAWSにデプロイ | `cdk deploy` |
+| **`cdk destroy`** | スタックを削除 | `cdk destroy` |
+
+**補助コマンド：**
+
+| コマンド | 説明 |
+|----------|------|
+| `cdk list` | プロジェクト内のスタック一覧を表示 |
+| `cdk bootstrap` | CDK用のリソースを初回セットアップ |
+| `cdk doctor` | CDK環境の診断 |
 
 ---
 layout: top-title
@@ -1148,6 +1195,9 @@ color: amber
 - スタック間でリソースを参照する
 - 本番環境と開発環境を分離する
 
+<!-- 
+時間の許すかぎりチャレンジしてみてください
+ -->
 
 ---
 layout: top-title
