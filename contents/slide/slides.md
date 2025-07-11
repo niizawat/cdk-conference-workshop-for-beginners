@@ -157,6 +157,13 @@ color: amber
 - [DevelopersIO | AWS WorkshopのVisual Studio Code Serverテンプレートをデプロイしてみた](https://dev.classmethod.jp/articles/aws-vscode-server-workshop-setup-review/)
 
 ---
+layout: section
+color: amber
+---
+
+# CDKの概要
+
+---
 layout: top-title
 color: amber
 ---
@@ -199,7 +206,11 @@ align: l-lt-lt
 
 ## TypeScript
 
-```ts
+```ts {monaco} { editorOptions: { lineNumbers: 'on', readOnly: false } }
+import * as cdk from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3'
+import { Construct } from 'constructs';
+
 export class S3Stack extends cdk.Stack {
   constructor(scope: Construct, id: string,
    props?: cdk.StackProps) {
@@ -224,7 +235,11 @@ export class S3Stack extends cdk.Stack {
 
 ## Python
 
-```python
+```python {monaco} { editorOptions: { lineNumbers: 'on', readOnly: true } }
+import aws_cdk as cdk
+import aws_cdk.aws_s3 as s3
+from aws_cdk import Construct
+
 class S3Stack(Stack):
     def __init__(self, scope: Construct, 
       construct_id: str, **kwargs) -> None:
@@ -238,10 +253,13 @@ class S3Stack(Stack):
             auto_delete_objects=True
         )
 
-        CfnOutput(self, "BucketName",
+        cdk.CfnOutput(self, "BucketName",
             value=bucket.bucket_name
         )
 ```
+<!-- 
+前スライドで説明したコード補完のデモもやってみせる
+ -->
 
 ---
 layout: top-title-two-cols
@@ -371,33 +389,78 @@ color: amber
 
 ::content::
 
-CDKを使うために覚えておきたい基本的なコマンドを紹介します
+よく利用する基本的なコマンド
 
 <style>
 .slidev-layout table {
-  font-size: 0.85rem;
   line-height: 1.3;
 }
 .slidev-layout td, .slidev-layout th {
   padding: 0.4rem 0.6rem;
 }
 </style>
-
 | コマンド | 説明 | 使用例 |
 |----------|------|--------|
-| **`cdk init`** | 新しいCDKプロジェクトを初期化 | `cdk init --language typescript` |
-| **`cdk synth`** | CDKコードをCloudFormationテンプレートに変換 | `cdk synth` |
-| **`cdk diff`** | 現在のスタックとの差分を表示 | `cdk diff` |
-| **`cdk deploy`** | スタックをAWSにデプロイ | `cdk deploy` |
-| **`cdk destroy`** | スタックを削除 | `cdk destroy` |
+| **`init`** | 新しいCDKプロジェクトを初期化 | `cdk init --language typescript` |
+| **`synth`** | CDKコードをCloudFormationテンプレートに変換 | `cdk synth` |
+| **`deploy`** | スタックをAWSにデプロイ | `cdk deploy` |
+| **`diff`** | 現在のスタックとの差分を表示 | `cdk diff` |
+| **`destroy`** | スタックを削除 | `cdk destroy` |
+| **`bootstrap`** | CDK用のリソースを初回セットアップ | `cdk bootstrap` |
+| **`list`** | プロジェクト内のスタック一覧を表示 | `cdk list` |
+| **`doctor`** | CDK環境の診断 | `cdk doctor` |
 
-**補助コマンド：**
+---
+layout: top-title
+color: amber
+---
 
-| コマンド | 説明 |
-|----------|------|
-| `cdk list` | プロジェクト内のスタック一覧を表示 |
-| `cdk bootstrap` | CDK用のリソースを初回セットアップ |
-| `cdk doctor` | CDK環境の診断 |
+::title::
+
+# CDK開発の流れ
+
+::content::
+
+<br/>
+<br/>
+<br/>
+
+<div class="flex justify-center">
+
+```mermaid {scale: 0.48}
+flowchart LR
+    A[開始] --> B[init]
+    B --> C[実装]
+    C --> D[synth]
+    D --> E{OK?}
+    E -->|❌| C
+    E -->|⭕| F{bootstrap済?}
+    F -->|❌| G[bootstrap]
+    F -->|⭕| H[diff]
+    G --> H
+    H --> I{問題なし?}
+    I -->|❌| C
+    I -->|⭕| J[deploy]
+    J --> K[マネコン等で確認]
+    K --> L{追加/変更?}
+    L -->|⭕| C
+    
+    style A fill:#e8f5e8
+    style B fill:#e1f5fe
+    style G fill:#e3f2fd
+    style C fill:#fff3e0
+    style D fill:#f3e5f5
+    style J fill:#ffebee
+```
+
+</div>
+
+---
+layout: section
+color: amber
+---
+
+## サンプルコードでCDKを動かしてみよう
 
 ---
 layout: top-title
@@ -410,14 +473,16 @@ color: amber
 
 ::content::
 
-まずは、事前に用意した翻訳Webアプリのサンプルコードを使って、CDKを体験してみましょう！
+事前に用意した翻訳Webアプリのサンプルコードを使って、CDKを体験してみましょう！
 
 **手順：**
-1. サンプルリポジトリをクローン
-2. 依存関係をインストール
-3. CDKコマンドでデプロイ
-4. AWS上にリソースが作られる様子を確認
-5. 実際にWebアプリを動かしてみる
+
+1. Visual Studio Code Serverにログイン
+2. サンプルリポジトリをクローン
+3. 依存関係をインストール
+4. CDKコマンドでデプロイ
+5. AWS上にリソースが作られる様子を確認
+6. 実際にWebアプリを動かしてみる
 
 **所要時間：** 約10-15分
 
@@ -467,6 +532,29 @@ graph LR
   <figure>
     <img src="./images/demo.png" width="300" height="300" />
     <figcaption style="font-size: 10pt; text-align: center;">フロントエンド</figcaption>
+  </figure>
+</div>
+
+---
+layout: top-title
+color: amber
+---
+
+::title::
+
+# Visual Studio Code Serverにログインしよう
+
+::content::
+
+Visual Studio Code Serverのデプロイが完了したら、開発環境にログインしてください。
+
+<AdmonitionType type='note' >
+ログイン手順はデプロイ時のドキュメントを参照してください
+</AdmonitionType>
+
+<div class="flex justify-center">
+  <figure>
+    <img src="./images/vscode-server.png" width="450" />
   </figure>
 </div>
 
@@ -643,7 +731,6 @@ color: amber
 **bin/cdk.ts** : CDKアプリケーションのエントリーポイント(ファイル名は任意)
 
 ```ts
-#!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
 import { AppStack } from '../lib/app-stack';
 
@@ -881,6 +968,14 @@ export class AppStack extends cdk.Stack {
 <!-- 
 コンストラクトについて説明する
  -->
+
+---
+layout: section
+color: amber
+---
+
+# それでは実際にCDK書いてみましょう
+
 ---
 layout: top-title
 color: amber
@@ -888,7 +983,7 @@ color: amber
 
 ::title::
 
-# ハンズオン：シンプルなAPIを作ってみよう
+# シンプルなAPIを作ってみよう
 
 ::content::
 
@@ -950,7 +1045,7 @@ touch lambda/hello/index.js
 
 `lambda/hello/index.js` をエディタで開き、以下のコードを入力してください：
 
-```js {monaco} { editorOptions: { lineNumbers: 'on' } }
+```js
 exports.handler = async (event) => {
   return {
     statusCode: 200,
@@ -978,7 +1073,7 @@ color: amber
 
 次に、`lib/my-hello-api-stack.ts`を以下のように変更してLambda関数を定義します：
 
-```ts {monaco} { editorOptions: { lineNumbers: 'on' } }
+```ts
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
@@ -1047,7 +1142,7 @@ color: amber
 
 右の内容に修正してください
 
-```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+```ts {monaco-diff} { height: '350px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
@@ -1102,6 +1197,10 @@ export class MyHelloApiStack extends cdk.Stack {
 }
 ```
 
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
+
 ---
 layout: top-title
 color: amber
@@ -1152,7 +1251,7 @@ color: amber
 $ npx cdk deploy
 
 # API Gateway URLにアクセス
-curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
+$ curl https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/prod/hello
 
 # レスポンス例
 {"message":"Hello, World!","timestamp":"2025-07-07T00:47:45.296Z"}
@@ -1175,7 +1274,7 @@ CDKを使ってシンプルなAPIを作成できました！
 - Lambda関数の作成
 - API Gatewayの作成
 - CDKでのデプロイ
-- 差分の確認
+- diffコマンドで差分の確認
 
 ---
 layout: top-title
@@ -1228,7 +1327,7 @@ color: amber
 
 `lib/database-stack.ts`を作成：
 
-```ts {monaco} { editorOptions: { lineNumbers: 'on' }, height: '400px' }
+```ts {monaco} { editorOptions: { lineNumbers: 'on', readOnly: true }, height: '350px'}
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
@@ -1254,6 +1353,10 @@ export class DatabaseStack extends cdk.Stack {
 }
 ```
 
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
+
 ---
 layout: top-title
 color: amber
@@ -1267,7 +1370,7 @@ color: amber
 
 `bin/my-hello-api.ts`を編集して、新しいスタックを追加：
 
-```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+```ts {monaco-diff} { height: '350px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 import * as cdk from 'aws-cdk-lib';
 import { MyHelloApiStack } from '../lib/my-hello-api-stack';
 
@@ -1289,6 +1392,10 @@ new DatabaseStack(app, 'DatabaseStack', {
   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
 });
 ```
+
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
 
 ---
 layout: top-title
@@ -1403,7 +1510,7 @@ color: amber
 
 `lib/s3-stack.ts`を新規作成して、S3バケットを定義：
 
-```ts {monaco} { height: '400px', editorOptions: { lineNumbers: 'on' } }
+```ts {monaco} { height: '350px', editorOptions: { lineNumbers: 'on' } }
 import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -1431,6 +1538,10 @@ export class S3Stack extends cdk.Stack {
 }
 ```
 
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
+
 ---
 layout: top-title
 color: amber
@@ -1444,7 +1555,7 @@ color: amber
 
 `lib/my-hello-api-stack.ts`を修正して、S3バケットインスタンスを受け取る：
 
-```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+```ts {monaco-diff} { height: '350px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
@@ -1531,6 +1642,10 @@ export class MyHelloApiStack extends cdk.Stack {
 }
 ```
 
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
+
 ---
 layout: top-title
 color: amber
@@ -1544,7 +1659,7 @@ color: amber
 
 `lambda/hello/index.js`を修正して、S3を操作：
 
-```js {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+```js {monaco-diff} { height: '350px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 exports.handler = async (event) => {
   return {
     statusCode: 200,
@@ -1622,6 +1737,10 @@ exports.handler = async (event) => {
 };
 ```
 
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
+
 ---
 layout: top-title
 color: amber
@@ -1635,7 +1754,7 @@ color: amber
 
 `bin/my-hello-api.ts`を修正して、S3StackからApiStackにS3バケットを渡す：
 
-```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+```ts {monaco-diff} { height: '350px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 import * as cdk from 'aws-cdk-lib';
 import { MyHelloApiStack } from '../lib/my-hello-api-stack';
 import { DatabaseStack } from '../lib/database-stack';
@@ -1672,6 +1791,10 @@ new DatabaseStack(app, 'DatabaseStack', {
   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
 });
 ```
+
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
 
 ---
 layout: top-title
@@ -1778,8 +1901,8 @@ color: amber
 **手順：**
 
 1. 環境設定ファイルを作成
-2. S3Stackを環境対応に修正
-3. MyHelloApiStackを環境対応に修正
+2. S3Stackを修正
+3. MyHelloApiStackを修正
 4. 環境別デプロイを設定
 5. 環境別にデプロイして確認
 
@@ -1915,6 +2038,10 @@ export const environments: { [key: string]: EnvironmentConfig } = {
 };
 ```
 
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
+
 ---
 layout: top-title
 color: amber
@@ -1922,15 +2049,13 @@ color: amber
 
 ::title::
 
-# ステップ2: S3Stackを環境対応に修正
+# ステップ2: S3Stackを修正
 
 ::content::
 
-既存の`S3Stack`を環境対応版に修正します：
-
 `lib/s3-stack.ts`を以下に変更：
 
-```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+```ts {monaco-diff} { height: '350px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -1980,11 +2105,17 @@ export class S3Stack extends cdk.Stack {
 }
 ```
 
-**変更点の説明：**
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
+
+<!--
+ **変更点の説明：**
 - `EnvironmentConfig`のimportを追加
 - コンストラクタの第3引数に`config`を追加
 - バケット名に環境名を含む
-- 削除ポリシーを環境設定に応じて変更
+- 削除ポリシーを環境設定に応じて変更 
+-->
 
 ---
 layout: top-title
@@ -1993,11 +2124,9 @@ color: amber
 
 ::title::
 
-# ステップ3: MyHelloApiStackを環境対応に修正
+# ステップ3: MyHelloApiStackを修正
 
 ::content::
-
-既存の`MyHelloApiStack`を環境対応版に修正します：
 
 `lib/my-hello-api-stack.ts`を以下に変更：
 
@@ -2088,6 +2217,10 @@ export class MyHelloApiStack extends cdk.Stack {
 }
 ```
 
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
+
 ---
 layout: top-title
 color: amber
@@ -2101,7 +2234,7 @@ color: amber
 
 `bin/my-hello-api.ts`を環境別デプロイに対応：
 
-```ts {monaco-diff} { height: '400px', editorOptions: { lineNumbers: 'on', readOnly: true } }
+```ts {monaco-diff} { height: '350px', editorOptions: { lineNumbers: 'on', readOnly: true } }
 import * as cdk from 'aws-cdk-lib';
 import { MyHelloApiStack } from '../lib/my-hello-api-stack';
 import { DatabaseStack } from '../lib/database-stack';
@@ -2165,6 +2298,10 @@ new DatabaseStack(app, 'DatabaseStack', {
   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
 });
 ```
+
+<AdmonitionType type='tip' >
+コードをコピーするときはコンテキストメニュー(右クリック)使ってください🙏
+</AdmonitionType>
 
 ---
 layout: top-title
