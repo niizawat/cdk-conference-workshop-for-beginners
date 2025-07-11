@@ -36,7 +36,7 @@ export class WebsiteStack extends cdk.Stack {
         ],
       },
       // セキュリティヘッダーの自動挿入を有効化
-      insertHttpSecurityHeaders: true,
+      insertHttpSecurityHeaders: false,
     });
 
     // スライドの静的ファイルをS3にデプロイ
